@@ -139,10 +139,18 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameMap.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="mainsource.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Rock.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameMap.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Rock.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

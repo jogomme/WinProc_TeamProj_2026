@@ -8,6 +8,9 @@
 #pragma comment (lib, "msimg32.lib")
 
 #include "resource.h"
+#include "GameObject.h"
+#include "Player.h"
+#include "Rock.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";
