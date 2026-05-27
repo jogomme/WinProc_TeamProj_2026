@@ -139,9 +139,12 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="branch\player_enforce.cpp" />
     <ClCompile Include="GameMap.cpp" />
     <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="mainsource.cpp" />
+    <ClCompile Include="mainsource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Rock.cpp" />
   </ItemGroup>

@@ -30,6 +30,9 @@
     <ClCompile Include="GameMap.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="branch\player_enforce.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
