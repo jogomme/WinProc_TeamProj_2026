@@ -19,13 +19,25 @@ public:
 	// 멤버 함수
 	void show() const;		
 
-	// X , Y 좌표와 체력을 반환하는 함수
+	// Getter 함수
 	int GetX();
 	int GetY();
 	double GetHP();
+	int GetSpeed();
+	int GetAttackPower();
+	int GetSize();
 
-	void GetDemege(double damage); // 암석이 데미지를 받는 함수
-	void attack(); // 공격 함수)
+	// 위치 설정 함수
+	void SetPosition(double x, double y); 
+	
+	//데미지를 받는 함수
+	void GetDemege(double damage); 
+	
+	// 공격 함수
+	void attack();
+
+	//이동 함수
+	virtual void Move(double x, double y);
 
 protected :
 	int m_hp; // 체력

@@ -22,8 +22,9 @@ public:
 	// 게임 맵을 출력하는 함수
 	void show() const; 
 
-	// 현재 스테이지 반환 함수
+	// Getter 함수
 	int GetStage() const;
+	int GetTickRate() const;
 
 protected :
 
@@ -31,4 +32,7 @@ protected :
 	// 0번 index 가 가장 낮은 가치를 지님
 	MinRock m_rock[3];
 	int m_stage;
+
+	// 게임의 진행 속도를 조절하는 변수
+	int TickRate; 
 };

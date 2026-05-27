@@ -26,6 +26,9 @@ public:
 
 	int GetMinLengthID(); // 최소거리에 있는 암석의 ID 반환 함수
 
+	// 이동 함수
+	virtual void Move(double x, double y) override;
+
 private:
 	int attackType; // 공격 종류
 

@@ -22,7 +22,7 @@ void GameObject::show() const
 }
 
 
-// X , Y 좌표와 체력을 반환하는 함수
+// Getter 함수
 int GameObject::GetX()
 {
 	return m_x;
@@ -38,10 +38,40 @@ double GameObject::GetHP()
 	return m_hp;
 }
 
+int GameObject::GetSpeed()
+{
+	return m_speed;
+}
+
+int GameObject::GetAttackPower()
+{
+	return m_attackPower;
+}
+
+int GameObject::GetSize()
+{
+	return m_size;
+}
+
+// 데미지 받는 함수
 void GameObject::GetDemege(double damage)
 {
 	m_hp -= damage;
 	if (m_hp < 0) {
 		m_hp = 0;
 	}
+}
+
+// 위치 설정 함수
+void GameObject::SetPosition(double x, double y)
+{
+	m_x = x;
+	m_y = y;
+}
+
+// 이동 함수
+void GameObject::Move(double x, double y)
+{
+	m_x += x * m_speed;
+	m_y += y * m_speed;
 }

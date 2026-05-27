@@ -11,6 +11,7 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "Rock.h"
+#include "GameMap.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";
@@ -53,8 +54,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	}
 	return Message.wParam;
 }
+//-----------------------------------------------------------------------------------------------
+// 전역 변수 선언 구간
+//-----------------------------------------------------------------------------------------------
+Player player;
 
+int xPos{};
+int yPos{};
+
+//-----------------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+//-----------------------------------------------------------------------------------------------
 {
 	PAINTSTRUCT ps;
 	HDC hDC, mDC, imgDC; // hDC - 최종 출력 화면 / mDC - 더블 퍼버링용. 대부분의 그림 출력은 여기에 / imgDC - 그림 선택할 때 사용.
@@ -75,12 +85,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 	case WM_CREATE:
 		srand(time(NULL));
+
+
+
 		/*
 		imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP1));
 		imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP2));
 		imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP3));
 		GetObject(imgBitmap[0], sizeof(BITMAP), &imgBmp);
 		*/
+
 
 		GetClientRect(hWnd, &rectView);
 		rectViewMid.x = (rectView.left + rectView.right) / 2;
@@ -131,6 +145,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		DeleteObject(hPen);
 		*/
 
+
 		// 사용한 DC 반환
 		DeleteDC(imgDC);
 
@@ -147,14 +162,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_TIMER:
 		switch (wParam) {
 		case 1:
-
+			player.Move(xPos, yPos);
 			break;
-
 		}
 
 		InvalidateRect(hWnd, NULL, false);
 		break;
-
+	case WM_MOUSEMOVE:
+		xPos = GET_X_LPARAM(lParam);
+		yPos = GET_Y_LPARAM(lParam);
+		InvalidateRect(hWnd, NULL, false);
+		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 

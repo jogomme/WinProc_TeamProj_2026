@@ -16,3 +16,8 @@ int GameMap::GetStage() const
 {
 	return m_stage;
 }
+
+int GameMap::GetTickRate() const
+{
+	return TickRate;
+}

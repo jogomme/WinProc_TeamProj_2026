@@ -20,6 +20,7 @@ public:
 	// 멤버 함수
 	void show() const;
 
+	// Getter 함수
 	int GetID() const;
 
 private :
