@@ -13,6 +13,7 @@ Player::Player()
 	m_y = 0;
 	attackType = 0;
 	m_size = 50;
+	m_fual = 100;
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
 		m_length[i] = INF;
@@ -25,16 +26,24 @@ Player::~Player()
 }
 
 // 플레이어와 암석 사이의 거리 계산 함수
-void Player::SetLength(Rock r)
+void Player::SetLength(const Rock& r)
 {
 	m_length[r.GetID()] = sqrt(pow(m_x - r.GetX(), 2) + pow(m_y - r.GetY(), 2));
+
+	// 충돌 판정 - 암석의 크기를 고려해서, 
+	// 플레이어와 암석 사이의 거리가 플레이어의 크기보다 작아지는 경우 데미지를 받는다.
+	if (m_length[r.GetID()] - r.GetSize() < m_size)
+	{
+		GetDemege(r.GetAttackPower());
+	}
 }
 
 // 최소거리에 있는 암석의 ID 반환 함수
 int Player::GetMinLengthID()
 {
 	double copy[MAX_ROCKS];
-
+	double best = INF; 
+	int bestId = -1;
 	memcpy(copy, m_length, sizeof(m_length));
 
 	qsort(copy, MAX_ROCKS, sizeof(double), [](const void* a, const void* b) {
@@ -48,16 +57,16 @@ int Player::GetMinLengthID()
 
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
-		if (copy[0] == m_length[i])
+		if (m_length[i] < best && m_length[i] < INF)
 		{
-			return i;
+			best = m_length[i]; bestId = i;
 		}
 	}
 
-	return -1; // 에러 처리
+	return bestId;
 }
 
-void Player::attack(Rock r)
+void Player::attack(Rock& r)
 {
 	// 암석의 ID
 	int rID = r.GetID();
@@ -71,13 +80,14 @@ void Player::attack(Rock r)
 		return;
 	}
 
+
+
 	// attckType이 0이면 기본 공격
 	if (attackType == 0)
 	{
 		// 최소거리에 있는 암석이 공격받는 암석이면 데미지를 받는다.
-		if (rID == rMinID && !m_length[rID] == -1)
-		{
-			r.GetDemege(m_attackPower);
+		if (rID == rMinID && m_length[rID] != -1) { 
+			r.GetDemege(m_attackPower); 
 		}
 	}
 	else if (attackType == 1) {
@@ -112,3 +122,36 @@ void Player::Move(double targetX, double targetY)
 	m_x += dirX * m_speed;
 	m_y += dirY * m_speed;
 }
+
+void Player::ConsumeFual(int stage)
+{
+	m_fual -= (1 + stage * 1.2 );
+	if (m_fual < 0) {
+		m_fual = 0;
+	}
+}
+
+// 공격 종류 설정 함수
+void Player::SetAttackType(int type) 
+{
+	attackType = type;
+}
+
+// 연료 증가 함수
+void Player::SetFual(double deg)
+{
+	m_fual += deg;
+}
+
+// 속도 증가 함수
+void Player::SetSpeed(double deg)
+{
+	m_speed += deg;
+}
+
+// 공격력 증가 함수
+void Player::SetAttackPower(double deg)
+{
+	m_attackPower += deg;
+}
+

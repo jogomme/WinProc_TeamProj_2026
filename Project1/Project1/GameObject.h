@@ -20,12 +20,12 @@ public:
 	void show() const;		
 
 	// Getter 함수
-	int GetX();
-	int GetY();
-	double GetHP();
-	int GetSpeed();
-	int GetAttackPower();
-	int GetSize();
+	double GetX() const;
+	double GetY() const;
+	double GetHP() const;
+	double GetSpeed() const;
+	double GetAttackPower() const;
+	double GetSize() const;
 
 	// 위치 설정 함수
 	void SetPosition(double x, double y); 
