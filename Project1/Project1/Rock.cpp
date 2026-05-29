@@ -1,43 +1,58 @@
-#include <iostream>
+﻿#include <iostream>
 #include "Rock.h"
 #include "GameObject.h"
 #include "GameMap.h"
 #include <time.h>
 #include<random>
 
-std::default_random_engine gen(time(NULL)); // 난수 생성기 초기화
+#define width 1280
+#define height 800
+
+std::default_random_engine generate(time(NULL)); // 난수 생성기 초기화
 std::uniform_int_distribution<int> minRockDist(0, 3); // 0, 1, 2 중에서 랜덤한 정수를 생성하는 분포
 
 // 암석의 종류는 암석의 종류가 n 개이면 마지막을 n-1로 초기화
-std::uniform_int_distribution<int> rockTypeDist(0, 3); 
+std::uniform_int_distribution<int> rockTypeDist(0, 3);
 
 // 암석의 속도를 랜덤하게 설정하기 위한 분포
-std::uniform_int_distribution<int> speedDist(1, 5); 
+std::uniform_int_distribution<int> speedDist(1, 5);
+
+// 암석의 위치 생성
+std::uniform_int_distribution<int> rockPos(1, 4);
+
+// x 좌표에서 무작위 뽑기
+std::uniform_int_distribution<int> xPosDist(0, 1280);
+
+// y 좌표에서 무작위 뽑기
+std::uniform_int_distribution<int> yPosDist(0, 800);
+
+// 운석 생성시 생기는 공간 텀
+std::uniform_int_distribution<int> PlusPosDist(0, 30);
 
 int Rock::gid{ 0 }; // 암석 고유 번호를 위한 변수 초기화
 
 Rock::Rock()
-	: id{gid++}
+	: id{ gid++ }
 {
-	m_RockType = rockTypeDist(gen);
+	m_size = 20;
+}
 
-	int cnt{};
+Rock::~Rock()
+{
+	// 암석이 부숴질 때, 해당 암석의 종류에 맞는 갯수를 스테이지에 맞게 증가시킴
+	GameMap::m_rock[m_RockType].Num = minRockDist(generate) + GetS	tage() / 2;
+	GameMap::m_rockNum++;
+}
 
+void Rock::Spawn()
+{
 	// 지금 해금된 암석 종류에 맞춰서 랜덤값으로 암석의 종류 선정
 	while (true) {
+		m_RockType = rockTypeDist(generate);
 
-		for (int i = 0; i < m_MaxRockType; i++)
-		{
-			if (m_unlockType[i] == 1) {
-				if (i == m_RockType) {
-					break;
-				}
-			}
+		if (m_unlockType[m_RockType] == 1) {
+			break;
 		}
-
-		m_RockType = rockTypeDist(gen);
-		cnt++;
-
 	}
 
 	// 암석의 종류에 맞춰서 체력과 가격 설정
@@ -57,18 +72,12 @@ Rock::Rock()
 		m_hp = 4 + GetStage() * 1.2;
 		m_price = 50;
 	}
-	
+
+	SetRockPos();
+	setDirection(xPosDist(generate), yPosDist(generate));
+
 	// 암석의 속도 랜덤으로 설정
-	m_speed = speedDist(gen);
-
-	m_size = 1;
-}
-
-Rock::~Rock()
-{
-	// 암석이 부숴질 때, 해당 암석의 종류에 맞는 갯수를 스테이지에 맞게 증가시킴
-	GameMap::m_rock[m_RockType].Num = minRockDist(gen) + GetStage() / 2;
-	GameMap::m_rockNum++;
+	m_speed = speedDist(generate);
 }
 
 int Rock::GetID() const
@@ -80,14 +89,22 @@ void Rock::setDirection(int X, int Y)
 {
 	// 랜덤한 값 2개를 잡고 그것을 방향 벡터로 잡는 함수.
 
-	// x와 y 좌표의 차이를 구해서 방향 벡터로 설정
-	direction[0] = X - m_x;
-	direction[1] = Y - m_y;
+	double dx = X - m_x;
+	double dy = Y - m_y;
+	double distance = sqrt(dx * dx + dy * dy);
 
-	// 방향 벡터의 크기를 구해서 정규화
-	direction[0] /= sqrt(pow(direction[0], 2) + pow(direction[1], 2));
-	direction[1] /= sqrt(pow(direction[0], 2) + pow(direction[1], 2));
+	// (0으로 나누는 에러 방지)
+	if (distance == 0) return;
 
+	direction[0] = dx / distance;
+	direction[1] = dy / distance;
+
+}
+
+void Rock::StageStart(int x, int y)
+{
+	m_x = x;
+	m_y = y;
 }
 
 // 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
@@ -102,5 +119,31 @@ void Rock::UnlockRockType(int rockType)
 {
 	if (rockType >= 0 && rockType < m_MaxRockType) {
 		m_unlockType[rockType] = 1;
+	}
+}
+
+void Rock::SetRockPos()
+{
+	int pos = rockPos(generate);
+
+	// 상
+	if (pos == 1) {
+		m_y = 0 - PlusPosDist(generate);
+		m_x = xPosDist(generate);
+	}
+	// 하
+	else if (pos == 2) {
+		m_y = height + PlusPosDist(generate);
+		m_x = xPosDist(generate);
+	}
+	//좌
+	else if (pos == 3) {
+		m_y = yPosDist(generate);
+		m_x = 0 - PlusPosDist(generate);
+	}
+	//우
+	else if (pos == 4) {
+		m_y = yPosDist(generate);
+		m_x = width + PlusPosDist(generate);
 	}
 }
