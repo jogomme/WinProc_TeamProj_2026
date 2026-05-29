@@ -67,11 +67,14 @@ std::uniform_int_distribution<int> uid(0, 255);
 //-----------------------------------------------------------------------------------------------
 
 int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv);
-//void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
+void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
+
+// 콘솔 창 띄우는 용도입니다. Debug 용도입니다.
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 #define MAX_ROCKS 50
 
@@ -82,10 +85,12 @@ Rock rock[MAX_ROCKS];
 int xPos{};
 int yPos{};
 
+// 게임 상태 변수
 bool isGaming = false;
 
 // 캐릭터들 상태 타이머 변수
-const int move{ 1 };
+const int GoMove{ 1 };
+const int GoShow{ -1 };
 
 //-----------------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -226,7 +231,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
 
 				window_scene = 2;
-				isGaming = true;
 			}
 			else if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
 				my>rectViewMid.y + 30 && my < rectViewMid.y + 70) {
@@ -275,11 +279,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		// 전투 화면
+		// 게임 시작
 		else if (window_scene == 2) {
 			// 강제 사망 (임시)
 			if (mx > rectView.left + 5 && mx < rectView.left + 35 &&
 				my > rectView.top + 50 && my < rectView.top + 80) {
 				window_scene = 1;
+			}
+
+			if (!isGaming) {
+
+				isGaming = true;
+
+				for (int i = 0; i < MAX_ROCKS; ++i) {
+					rock[i].Spawn();
+				}
+
+				SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
 			}
 		}
 
@@ -384,7 +400,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (window_scene == 2) {
 			// 돌
 			{
-
+				HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
+				HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
+				for (int i = 0; i < MAX_ROCKS; ++i) {
+					int rx = rock[i].GetX();
+					int ry = rock[i].GetY();
+					int rs = rock[i].GetSize();
+					Rectangle(mDC, rx - rs, ry - rs, rx + rs, ry + rs);
+				}
+				DeleteObject(rBRUSH);
 			}
 
 			// 아이템 박스
@@ -394,10 +418,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			// 플레이어
 			{
+				HBRUSH pBRUSH = CreateSolidBrush(RGB(255,255, 255));
+				HBRUSH oldpBRUSH = (HBRUSH)SelectObject(mDC, pBRUSH);
 				int px = player.GetX();
 				int py = player.GetY();
 				int pS = player.GetSize();
 				Rectangle(mDC, px - pS, py - pS, px + pS, py + pS);
+				DeleteObject(pBRUSH);
+
 			}
 
 			// 총알
@@ -497,22 +525,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
 
-////----------------------------------------------------------------------------
-//void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
-////----------------------------------------------------------------------------
-//	HDC hDC;
-//	HBRUSH MyBrush, OldBrush;
-//	RECT rect;
-//	hDC = GetDC(hWnd);
-//	GetClientRect(hWnd, &rect);
-//
-//	if (idEvent == move) {
-//		player.Move(xPos, yPos);
-//	}
-//
-//	ReleaseDC(hWnd, hDC);
-//	InvalidateRect(hWnd, NULL, false);
-//}
+//----------------------------------------------------------------------------
+void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
+//----------------------------------------------------------------------------
+	HDC hDC;
+	HBRUSH MyBrush, OldBrush;
+	RECT rect;
+	hDC = GetDC(hWnd);
+	GetClientRect(hWnd, &rect);
+
+	if (idEvent == GoMove) {
+		if (player.GetHP() <= 0) {
+			KillTimer(hWnd, GoMove);
+			isGaming = false;
+		}
+
+		player.Move(xPos, yPos);
+
+		for (int i = 0; i < MAX_ROCKS; ++i) {
+			player.SetLength(rock[i]);
+			rock[i].Move(xPos,yPos);
+		}
+		rock[0].show();
+	}
+
+	ReleaseDC(hWnd, hDC);
+	InvalidateRect(hWnd, NULL, false);
+}
 
 int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv)
 {

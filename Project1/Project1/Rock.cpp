@@ -40,7 +40,7 @@ Rock::Rock()
 Rock::~Rock()
 {
 	// 암석이 부숴질 때, 해당 암석의 종류에 맞는 갯수를 스테이지에 맞게 증가시킴
-	GameMap::m_rock[m_RockType].Num = minRockDist(generate) + GetS	tage() / 2;
+	GameMap::m_rock[m_RockType].Num = minRockDist(generate) + GetStage() / 2;
 	GameMap::m_rockNum++;
 }
 
@@ -99,12 +99,6 @@ void Rock::setDirection(int X, int Y)
 	direction[0] = dx / distance;
 	direction[1] = dy / distance;
 
-}
-
-void Rock::StageStart(int x, int y)
-{
-	m_x = x;
-	m_y = y;
 }
 
 // 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.

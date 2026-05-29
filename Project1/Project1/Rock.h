@@ -16,9 +16,8 @@ public:
 	// 복사 생성자와 대입 연산자 삭제
 	Rock(const Rock& other) = delete;
 	Rock& operator=(const Rock& other) = delete;
-	
+
 	// 멤버 함수
-	void show() const;
 
 	// Getter 함수
 	int GetID() const;// 완
@@ -32,15 +31,21 @@ public:
 	// 암석 해금 함수
 	void UnlockRockType(int rockType); // 완
 
-private :
+	// 운석 생성 함수
+	void Spawn();
+
+	// 운석 위치 세팅 함수
+	void SetRockPos();
+
+private:
 	int id; // 암석 고유 번호
 	static int gid; // 암석 고유 번호를 위한 전역 변수
-	int direction[2]; // 암석이 이동하는 방향, x, y 좌표이다.
+	double direction[2]; // 암석이 이동하는 방향, x, y 좌표이다.
 
 	double m_price; // 가격
 
 	const int m_MaxRockType = 4; // 암석의 최대 종류
 	int m_RockType; // 현재 내가 어떤 암석인지
-	int m_unlockType[4] = {1,0,0,0}; // 지금 암석이 나오는 종류
+	int m_unlockType[4] = { 1,0,0,0 }; // 지금 암석이 나오는 종류
 
 };

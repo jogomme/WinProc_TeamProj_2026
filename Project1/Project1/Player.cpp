@@ -9,10 +9,10 @@ Player::Player()
 	m_attackPower = 1;
 	m_hp = 1;
 	m_speed = 10;
-	m_x = 0;
-	m_y = 0;
+	m_x = 690;
+	m_y = 400;
 	attackType = 0;
-	m_size = 50;
+	m_size = 20;
 	m_fual = 100;
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
