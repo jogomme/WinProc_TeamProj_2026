@@ -1,4 +1,4 @@
-﻿#include<Windows.h>
+#include<Windows.h>
 #include<windowsx.h>
 #include<time.h>
 #include<iostream>
@@ -137,36 +137,48 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hBrush[7] = CreateSolidBrush(RGB(255, 255, 255)); //white
 		hBrush[8] = CreateSolidBrush(RGB(70, 70, 70)); //gray
 
+		// 크기, 0, 0, 0, 두께(BOLD, NORMAL), ,,, 글꼴 이름
+		hFont = CreateFont(20, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+			HANGUL_CHARSET, OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
+			DEFAULT_PITCH | FF_DONTCARE, L"맑은 고딕");
+
 		timercnt = 0;
 
-		window_scene = 0;
+		window_scene = 0; // 현재 시작시 화면. 기본값: 0 / 현재 테스트 중인 값: n
 
-		enforce_cnt = 5;
-		enforce_size = 20;
-		enforce_intrv = 80;
-		// 사용법 // (화면 중앙 포인트, xy 좌표중 택1, xy 좌표의 배율[상대적 좌표], 버튼 사이 거리)
-		// 예시작으로 5개 구현
-		enforce[0].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
-		enforce[0].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-		enforce[0].type = 0; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
+		// 강화 버튼 관련
+		{
+			enforce_cnt = 5;
+			enforce_size = 20;
+			enforce_intrv = 80;
+			// 사용법 // (화면 중앙 포인트, xy 좌표중 택1, xy 좌표의 배율[상대적 좌표], 버튼 사이 거리)
+			// 예시작으로 5개 구현
+			enforce[0].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
+			enforce[0].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
+			enforce[0].type = 0; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
 
-		enforce[1].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
-		enforce[1].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-		enforce[1].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[1].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
+			enforce[1].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
+			enforce[1].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
-		enforce[2].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
-		enforce[2].y = Enforce_Point_Calc(rectViewMid, 'y', 1, enforce_intrv);
-		enforce[2].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[2].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
+			enforce[2].y = Enforce_Point_Calc(rectViewMid, 'y', 1, enforce_intrv);
+			enforce[2].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
-		enforce[3].x = Enforce_Point_Calc(rectViewMid, 'x', -1, enforce_intrv);
-		enforce[3].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-		enforce[3].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[3].x = Enforce_Point_Calc(rectViewMid, 'x', -1, enforce_intrv);
+			enforce[3].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
+			enforce[3].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
-		enforce[4].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
-		enforce[4].y = Enforce_Point_Calc(rectViewMid, 'y', -1, enforce_intrv);
-		enforce[4].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[4].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
+			enforce[4].y = Enforce_Point_Calc(rectViewMid, 'y', -1, enforce_intrv);
+			enforce[4].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+		}
 
 		drag = 0;
+
+		player.Move(rectViewMid.x / 10, rectViewMid.y / 10); // 시작시 중앙 세팅. /10 <- 플레이어 기본 속도
+
 		break;
 
 	case WM_SIZE:
@@ -193,10 +205,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		my = HIWORD(lParam);
 
 		// 메인 화면에서, 시작 버튼 클릭.
-		//* 현재는 강화 화면으로 이동하게 되어있음.
 		if (window_scene == 0 && mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
 			my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
-			window_scene = 1;
+			window_scene = 2;
 		}
 
 		else if (window_scene == 1) {
@@ -256,9 +267,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		// 필요 내용 작성은 이 밑으로.
 
+		oldPen = (HPEN)SelectObject(mDC, hPen[0]);
 		// 게임 시작 화면
 		if (window_scene == 0) {
-			oldPen = (HPEN)SelectObject(mDC, hPen[0]);
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
 			//시작 버튼
 			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 20, rectViewMid.x + 100, rectViewMid.y + 20);
@@ -283,6 +294,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 
 			SelectObject(mDC, oldBrush);
+		}
+		// 전투 화면
+		else if (window_scene == 2) {
+			// 돌
+			{
+
+			}
+
+			// 아이템 박스
+			{
+				
+			}
+
+			// 플레이어
+			{
+
+			}
+
+			// 총알
+			{
+
+			}
+
+			// 체력바
+			{
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
+				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
+
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
+				//current_hp max_hp <- 임의로 지어둔 이름
+				//Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (float)(max_hp-current_hp)*400, rectView.top + 45);
+				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + 0.65 * 400, rectView.top + 45);
+
+				oldFont = (HFONT)SelectObject(mDC, hFont);
+				SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+				wchar_t str[64];
+				// 플레이어 현재 체력 / 최대 체력 (연료)
+				//current_hp max_hp <- 임의로 지어둔 이름
+				//wsprintf(str, L"%d / %d", current_hp, max_hp);
+				wsprintf(str, L"0 / 0");
+				TextOut(mDC, rectView.left + 165, rectView.top + 15, str, lstrlen(str));
+			}
 		}
 
 		// 사용한 DC 반환
