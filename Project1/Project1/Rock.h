@@ -21,12 +21,26 @@ public:
 	void show() const;
 
 	// Getter 함수
-	int GetID() const;
+	int GetID() const;// 완
+
+	// 암석이 이동하는 방향 설정 함수
+	void setDirection(int X, int Y); // 완
+
+	// 이동 함수
+	void Move(double x, double y) override; // 완
+
+	// 암석 해금 함수
+	void UnlockRockType(int rockType); // 완
 
 private :
 	int id; // 암석 고유 번호
 	static int gid; // 암석 고유 번호를 위한 전역 변수
+	int direction[2]; // 암석이 이동하는 방향, x, y 좌표이다.
 
 	double m_price; // 가격
-	int m_RockType; // 암석 종류
+
+	const int m_MaxRockType = 4; // 암석의 최대 종류
+	int m_RockType; // 현재 내가 어떤 암석인지
+	int m_unlockType[4] = {1,0,0,0}; // 지금 암석이 나오는 종류
+
 };
