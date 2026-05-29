@@ -23,32 +23,32 @@ void GameObject::show() const
 
 
 // Getter 함수
-int GameObject::GetX()
+double GameObject::GetX() const
 {
 	return m_x;
 }
 
-int GameObject::GetY()
+double GameObject::GetY() const
 {
 	return m_y;
 }
 
-double GameObject::GetHP()
+double GameObject::GetHP() const
 {
 	return m_hp;
 }
 
-int GameObject::GetSpeed()
+double GameObject::GetSpeed() const
 {
 	return m_speed;
 }
 
-int GameObject::GetAttackPower()
+double GameObject::GetAttackPower() const
 {
 	return m_attackPower;
 }
 
-int GameObject::GetSize()
+double GameObject::GetSize() const
 {
 	return m_size;
 }
