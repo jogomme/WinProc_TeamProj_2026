@@ -8,7 +8,7 @@
 #include<random>
 #pragma comment (lib, "msimg32.lib")
 
-#include "resource.h"
+#include "resource1.h"
 #include "GameObject.h"
 #include "Player.h"
 #include "Rock.h"
@@ -127,15 +127,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	static int return_setting; // 세팅 화면에 오기 전, 어디 화면 이었는지 저장
 
+	static int hp_bar_motion;
+
 	switch (iMessage) {
 	case WM_CREATE:
 		srand(time(NULL));
-		/*
-		imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP1));
-		imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP2));
-		imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP3));
-		GetObject(imgBitmap[0], sizeof(BITMAP), &imgBmp);
-		*/
+		// Button Image
+		imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP1)); // Done
+		imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP2)); // Setting
+		imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP3)); // Game Start
+
+		// Other Image
+		imgBitmap[3] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP4)); // HP Bar
+		//GetObject(imgBitmap[0], sizeof(BITMAP), &imgBmp);
+		
 
 		GetClientRect(hWnd, &rectView);
 		rectViewMid.x = (rectView.left + rectView.right) / 2;
@@ -165,35 +170,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		// 강화 버튼 관련
 		{
-			enforce_cnt = 5;
+			enforce_cnt = 50;
 			enforce_size = 20;
 			enforce_intrv = 80;
 			// 사용법 // (화면 중앙 포인트, xy 좌표중 택1, xy 좌표의 배율[상대적 좌표], 버튼 사이 거리)
 			// 예시작으로 5개 구현
 			enforce[0].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
 			enforce[0].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[0].type = 0; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
+			enforce[0].type = 1; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
 
 			enforce[1].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
 			enforce[1].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[1].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[1].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
 			enforce[2].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
 			enforce[2].y = Enforce_Point_Calc(rectViewMid, 'y', 1, enforce_intrv);
-			enforce[2].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[2].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
 			enforce[3].x = Enforce_Point_Calc(rectViewMid, 'x', -1, enforce_intrv);
 			enforce[3].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[3].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[3].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
 			enforce[4].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
 			enforce[4].y = Enforce_Point_Calc(rectViewMid, 'y', -1, enforce_intrv);
-			enforce[4].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[4].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 		}
 
 		drag = 0;
 
-		player.Move(rectViewMid.x / 10, rectViewMid.y / 10); // 시작시 중앙 세팅. /10 <- 플레이어 기본 속도
+		hp_bar_motion = 0;
+		SetTimer(hWnd, 2, 100, NULL);
 
 		break;
 
@@ -223,13 +229,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// 메인 화면
 		if (window_scene == 0) {
 			if (mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
-				my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
+				my>rectViewMid.y - 50 && my < rectViewMid.y + 50) {
 
 				window_scene = 2;
 				isGaming = true;
 			}
 			else if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
-				my>rectViewMid.y + 30 && my < rectViewMid.y + 70) {
+				my>rectViewMid.y + 70 && my < rectViewMid.y + 170) {
 
 				return_setting = window_scene;
 				window_scene = 3;
@@ -260,9 +266,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					enforce[i].draw == 1 && window_scene == 1) {
 					ck = 1;
 					enforce[i].open = 1;
-					enforce[i * 3 + 1].draw = 1;
-					enforce[i * 3 + 2].draw = 1;
-					enforce[i * 3 + 3].draw = 1;
+					// 미사용 칸을 제외하고, 그림
+					if (enforce[i * 3 + 1].type != 0)
+						enforce[i * 3 + 1].draw = 1;
+					if (enforce[i * 3 + 2].type != 0)
+						enforce[i * 3 + 2].draw = 1;
+					if (enforce[i * 3 + 3].type != 0)
+						enforce[i * 3 + 3].draw = 1;
 				}
 			}
 
@@ -331,21 +341,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		oldPen = (HPEN)SelectObject(mDC, hPen[0]);
 		// 게임 시작 화면
 		if (window_scene == 0) {
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
 			//시작 버튼
-			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 20, rectViewMid.x + 100, rectViewMid.y + 20);
-			
-			oldFont = (HFONT)SelectObject(mDC, hFont);
-			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
-			wchar_t str[64];
-			wsprintf(str, L"Game Start"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectViewMid.x - 50, rectViewMid.y - 10, str, lstrlen(str));
+			SelectObject(imgDC, imgBitmap[2]);
+			StretchBlt(mDC, rectViewMid.x - 100, rectViewMid.y - 50, 200, 100, imgDC, 0, 0, 400, 200, SRCCOPY);
 
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
 			//설정 버튼
-			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 30, rectViewMid.x + 100, rectViewMid.y + 70);
-			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectViewMid.x - 40, rectViewMid.y + 40, str, lstrlen(str));
+			SelectObject(imgDC, imgBitmap[1]);
+			StretchBlt(mDC, rectViewMid.x - 100, rectViewMid.y + 70,  200, 100, imgDC, 0, 0, 400, 200, SRCCOPY);
 		}
 		// 강화 화면
 		else if (window_scene == 1) {
@@ -397,6 +399,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				int px = player.GetX();
 				int py = player.GetY();
 				int pS = player.GetSize();
+
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[5]);
 				Rectangle(mDC, px - pS, py - pS, px + pS, py + pS);
 			}
 
@@ -411,9 +415,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
 
 				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
+				SelectObject(imgDC, imgBitmap[3]);
 				//current_hp max_hp <- 임의로 지어둔 이름
-				//Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (float)(max_hp-current_hp)*400, rectView.top + 45);
-				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + 0.65 * 400, rectView.top + 45);
+				// // 풀피인 경우, rectangle 그림
+				// if ( current_hp == max_hp ){ 
+				//		oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
+				//		Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
+				// }
+				// // 피가 닳았을 경우, 애니매이션으로 그림
+				// else 
+				//		StretchBlt(mDC, rectView.left + 5, rectView.top + 5, (float)(max_hp - current_hp) * 400, 40, imgDC, 0, 0, 400, 200, SRCCOPY);
+				StretchBlt(mDC, rectView.left + 5, rectView.top + 5, 0.65 * 400, 40, imgDC, 0, hp_bar_motion * 41, 100, 40, SRCCOPY);
 
 				oldFont = (HFONT)SelectObject(mDC, hFont);
 				SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
@@ -473,6 +485,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		case 1:
 			player.Move(xPos, yPos);
 			break;
+
+		case 2:
+			hp_bar_motion++;
+			if (hp_bar_motion > 3) {
+				hp_bar_motion = 0;
+			}
 		}
 
 		InvalidateRect(hWnd, NULL, false);
