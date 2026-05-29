@@ -211,10 +211,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		else if (window_scene == 1) {
+
+			// 전투 진입 버튼 클릭
+			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
+				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
+				window_scene = 2;
+			}
+
+			// 강화 버튼 클릭
 			int ck = 0;
 			for (int i = 0; i < enforce_cnt; i++) {
 				if (mx > enforce[i].x - enforce_size && mx < enforce[i].x + enforce_size &&
-					my > enforce[i].y - enforce_size && my < enforce[i].y + enforce_size) {
+					my > enforce[i].y - enforce_size && my < enforce[i].y + enforce_size &&
+					enforce[i].draw == 1 && window_scene == 1) {
 					ck = 1;
 					enforce[i].open = 1;
 					enforce[i * 3 + 1].draw = 1;
@@ -223,10 +232,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				}
 			}
 
-			if (ck == 0) {
+			// 빈 공간 클릭
+			if (ck == 0 && window_scene == 1) {
 				drag = 1;
 				drag_start.x = mx;
 				drag_start.y = my;
+			}
+		}
+
+		else if (window_scene == 2) {
+			// 강제 사망 (임시)
+			if (mx > rectView.left + 5 && mx < rectView.left + 35 &&
+				my > rectView.top + 50 && my < rectView.top + 80) {
+				window_scene = 1;
 			}
 		}
 
@@ -273,13 +291,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
 			//시작 버튼
 			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 20, rectViewMid.x + 100, rectViewMid.y + 20);
+			
+			oldFont = (HFONT)SelectObject(mDC, hFont);
+			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+			wchar_t str[64];
+			wsprintf(str, L"Game Start"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectViewMid.x - 50, rectViewMid.y - 10, str, lstrlen(str));
 
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
 			//설정 버튼
 			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 30, rectViewMid.x + 100, rectViewMid.y + 70);
+			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectViewMid.x - 40, rectViewMid.y + 40, str, lstrlen(str));
 
 			SelectObject(mDC, oldBrush);
-			SelectObject(mDC, oldPen);
+			SelectObject(mDC, oldFont);
 		}
 		// 강화 화면
 		else if (window_scene == 1) {
@@ -293,6 +319,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					Rectangle(mDC, enforce[i].x - enforce_size, enforce[i].y - enforce_size, enforce[i].x + enforce_size, enforce[i].y + enforce_size);
 			}
 
+			// 전투 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
+			Rectangle(mDC, rectView.left + 5, rectView.bottom - 85, rectView.left + 205, rectView.bottom - 5);
+
+			oldFont = (HFONT)SelectObject(mDC, hFont);
+			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+			wchar_t str[64];
+			wsprintf(str, L"Go Fight"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 65, rectView.bottom - 55, str, lstrlen(str));
+
+			SelectObject(mDC, oldFont);
 			SelectObject(mDC, oldBrush);
 		}
 		// 전투 화면
@@ -337,7 +375,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				wsprintf(str, L"0 / 0");
 				TextOut(mDC, rectView.left + 165, rectView.top + 15, str, lstrlen(str));
 			}
+
+			// 강제 사망 (임시)
+			{
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
+				Rectangle(mDC, rectView.left + 5, rectView.top + 50, rectView.left + 35, rectView.top + 80);
+				
+				oldFont = (HFONT)SelectObject(mDC, hFont);
+				SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+				wchar_t str[64];
+				wsprintf(str, L"Death");
+				TextOut(mDC, rectView.left + 5, rectView.top + 50, str, lstrlen(str));
+			}
+
+			SelectObject(mDC, oldFont);
+			SelectObject(mDC, oldBrush);
 		}
+		SelectObject(mDC, oldPen);
 
 		// 사용한 DC 반환
 		DeleteDC(imgDC);
