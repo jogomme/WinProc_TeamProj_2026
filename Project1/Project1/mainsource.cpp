@@ -94,7 +94,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int mx, my; // 마우스 클릭 좌표
 	static int timercnt; // 타이머 갯수, 종료 및 초기화 등에서 KillTimer 함수를 위한 갯수를 저장. WM_CREATE 에서 갯수 저장할 것
 
-	static int window_scene; // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창
+	static int window_scene; // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창
 
 	// 강화 버튼
 	struct Enforce {
@@ -110,6 +110,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int enforce_cnt; // 강화 버튼 갯수
 	static int drag; // 마우스 드래그 중인지 체크
 	static POINT drag_start; // 드래그 시작점 저장
+
+	static int return_setting; // 세팅 화면에 오기 전, 어디 화면 이었는지 저장
 
 	switch (iMessage) {
 	case WM_CREATE:
@@ -204,18 +206,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		mx = LOWORD(lParam);
 		my = HIWORD(lParam);
 
-		// 메인 화면에서, 시작 버튼 클릭.
-		if (window_scene == 0 && mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
-			my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
-			window_scene = 2;
+		// 메인 화면
+		if (window_scene == 0) {
+			if (mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
+				my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
+
+				window_scene = 2;
+			}
+			else if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
+				my>rectViewMid.y + 30 && my < rectViewMid.y + 70) {
+
+				return_setting = window_scene;
+				window_scene = 3;
+			}
 		}
 
+		// 강화 화면
 		else if (window_scene == 1) {
 
 			// 전투 진입 버튼 클릭
 			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
 				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
 				window_scene = 2;
+			}
+
+			// 세팅 진입 버튼
+			else if (mx > rectView.left + 225 && mx < rectView.left + 430 &&
+				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
+				return_setting = window_scene;
+				window_scene = 3;
 			}
 
 			// 강화 버튼 클릭
@@ -240,11 +259,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
+		// 전투 화면
 		else if (window_scene == 2) {
 			// 강제 사망 (임시)
 			if (mx > rectView.left + 5 && mx < rectView.left + 35 &&
 				my > rectView.top + 50 && my < rectView.top + 80) {
 				window_scene = 1;
+			}
+		}
+
+		// 설정 화면
+		else if (window_scene == 3) {
+			if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
+				my > rectViewMid.y + 80 && my < rectViewMid.y + 120) {
+				window_scene = return_setting;
 			}
 		}
 
@@ -303,9 +331,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 30, rectViewMid.x + 100, rectViewMid.y + 70);
 			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
 			TextOut(mDC, rectViewMid.x - 40, rectViewMid.y + 40, str, lstrlen(str));
-
-			SelectObject(mDC, oldBrush);
-			SelectObject(mDC, oldFont);
 		}
 		// 강화 화면
 		else if (window_scene == 1) {
@@ -330,8 +355,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			wsprintf(str, L"Go Fight"); // 추후 이미지 버튼 등으로 변경 예정
 			TextOut(mDC, rectView.left + 65, rectView.bottom - 55, str, lstrlen(str));
 
-			SelectObject(mDC, oldFont);
-			SelectObject(mDC, oldBrush);
+			// 강화 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
+			Rectangle(mDC, rectView.left + 225, rectView.bottom - 85, rectView.left + 430, rectView.bottom - 5);
+
+			oldFont = (HFONT)SelectObject(mDC, hFont);
+			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 285, rectView.bottom - 55, str, lstrlen(str));
 		}
 		// 전투 화면
 		else if (window_scene == 2) {
@@ -387,10 +419,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				wsprintf(str, L"Death");
 				TextOut(mDC, rectView.left + 5, rectView.top + 50, str, lstrlen(str));
 			}
-
-			SelectObject(mDC, oldFont);
-			SelectObject(mDC, oldBrush);
 		}
+
+		else if (window_scene == 3) {
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
+			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 80, rectViewMid.x + 100, rectViewMid.y + 120);
+
+			oldFont = (HFONT)SelectObject(mDC, hFont);
+			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+			wchar_t str[64];
+			wsprintf(str, L"Go Back"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectViewMid.x - 50, rectViewMid.y + 90, str, lstrlen(str));
+		}
+
+		SelectObject(mDC, oldBrush);
+		SelectObject(mDC, oldFont);
 		SelectObject(mDC, oldPen);
 
 		// 사용한 DC 반환
