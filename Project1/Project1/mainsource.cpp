@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "Rock.h"
 #include "GameMap.h"
+#include "Plinko.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";

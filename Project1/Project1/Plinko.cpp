@@ -6,11 +6,8 @@
 가격 합산 O
 구역 계산 O
 구역 그리기 O
-운석 낙하 X
-핀볼 X
-
-충돌처리 X
-
+운석 생성 및 낙하 X
+핀볼 << 충돌처리 구현
 */
 
 #define ROCK_SIZE 40	// 운석 사이즈
@@ -44,7 +41,6 @@ struct pin {	// 튕기는 핀 위치
 };
 
 std::vector<pin> pinPos;
-
 
 PlinkoRock::PlinkoRock() {
 	p_price = m_rock[rockNum].Price;
@@ -140,8 +136,11 @@ int PlinkoRock::checkGoal() {
 bool plinkoCollisionCheck() {
 	
 	// 핀과 운석, 운석과 운석 충돌 처리
-	int rockX;
-	int rockY;
+	for (auto& p : pinPos) {
+		/*if (plinkoRock.m_x) {
+
+		}*/
+		return TRUE;
 	}
 	return FALSE;
 

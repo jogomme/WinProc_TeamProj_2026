@@ -16,7 +16,6 @@ public:
 	PlinkoRock();
 	~PlinkoRock();
 
-
 	int p_price;
 
 	void cntRock();
