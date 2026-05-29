@@ -77,7 +77,7 @@ int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv);
 #define MAX_ROCKS 50
 
 Player player;
-//Rock rock[MAX_ROCKS];
+Rock rock[MAX_ROCKS];
 
 // 현재 마우스 커서의 위치
 int xPos{};
