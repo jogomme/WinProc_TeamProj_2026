@@ -5,6 +5,7 @@
 #include<string.h>
 #include<math.h>
 #include<queue>
+#include<random>
 #pragma comment (lib, "msimg32.lib")
 
 #include "resource.h"
@@ -54,24 +55,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	}
 	return Message.wParam;
 }
+//-----------------------------------------------------------------------------------------------
+// 랜덤값 선언 구간
+//-----------------------------------------------------------------------------------------------
+
+std::default_random_engine(time());
+std::uniform_int_distribution<int> uid(0, 255);
 
 //-----------------------------------------------------------------------------------------------
 // 함수 선언 구간
 //-----------------------------------------------------------------------------------------------
-int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv)
-{
-	if (c == 'x')
-		return rectViewMid.x + xy * intrv;
-	else
-		return rectViewMid.y + xy * intrv;
-}
+
+int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv);
+//void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
+
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
-Player player;
 
+#define MAX_ROCKS 50
+
+Player player;
+Rock rock[MAX_ROCKS];
+
+// 현재 마우스 커서의 위치
 int xPos{};
 int yPos{};
+
+bool isGaming = false;
+
+// 캐릭터들 상태 타이머 변수
+const int move{ 1 };
 
 //-----------------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -208,6 +222,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (window_scene == 0 && mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
 			my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
 			window_scene = 2;
+			isGaming = true;
 		}
 
 		else if (window_scene == 1) {
@@ -309,7 +324,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			// 플레이어
 			{
-
+				int px = player.GetX();
+				int py = player.GetY();
+				int pS = player.GetSize();
+				Rectangle(mDC, px - pS, py - pS, px + pS, py + pS);
 			}
 
 			// 총알
@@ -379,4 +397,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
+}
+
+////----------------------------------------------------------------------------
+//void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
+////----------------------------------------------------------------------------
+//	HDC hDC;
+//	HBRUSH MyBrush, OldBrush;
+//	RECT rect;
+//	hDC = GetDC(hWnd);
+//	GetClientRect(hWnd, &rect);
+//
+//	if (idEvent == move) {
+//		player.Move(xPos, yPos);
+//	}
+//
+//	ReleaseDC(hWnd, hDC);
+//	InvalidateRect(hWnd, NULL, false);
+//}
+
+int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv)
+{
+	if (c == 'x')
+		return rectViewMid.x + xy * intrv;
+	else
+		return rectViewMid.y + xy * intrv;
 }
