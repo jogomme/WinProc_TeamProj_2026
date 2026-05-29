@@ -68,6 +68,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static BITMAP imgBmp; // 이미지 크기 잡는용, 배경 잡는용으로 썼는데, 배열로 바꿔서 써도 될듯
 	static HPEN hPen[10], oldPen;
 	static HBRUSH hBrush[10], oldBrush;
+	static HFONT hFont, oldFont;
 
 	static POINT point[10]; // Polygon 함수를 위한 변수. 그때그때 좌표 적어서 활용
 
@@ -252,11 +253,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			SelectObject(mDC, oldBrush);
 			SelectObject(mDC, oldPen);
 		}
+		// 강화 화면
 		else if (window_scene == 1) {
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
 			
 			for (int i = 0; i < enforce_cnt; i++) {
+				// 블럭 오픈 여부에 따른 색
 				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[8 - enforce[i].open]);
+				// 블럭 그리기
 				if (enforce[i].draw == 1)
 					Rectangle(mDC, enforce[i].x - enforce_size, enforce[i].y - enforce_size, enforce[i].x + enforce_size, enforce[i].y + enforce_size);
 			}
