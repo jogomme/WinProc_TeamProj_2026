@@ -35,7 +35,7 @@ public :
 	void CheckBoundary(int width, int height);
 	
 	// Getter 함수
-	int GetIsActive() const;
+	bool GetIsActive() const;
 
 private :
 	// 방향 벡터

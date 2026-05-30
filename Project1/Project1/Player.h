@@ -24,7 +24,11 @@ public:
 
 	void SetLength(const Rock& r); // 플레이어와 암석사이의 거리 계산 함수
 
+
+	// Getter
 	int GetMinLengthID(); // 최소거리에 있는 암석의 ID 반환 함수
+
+	int GetAttackSpeed();
 
 	//최소 거리에 있는 암석의 위치 반환 함수
 	Point GetMinLengthRock();
@@ -44,9 +48,13 @@ public:
 	// 연로 감소 함수 - 스테이지에 비례해 연료 감소량이 증가함
 	void ConsumeFual(int stage);
 
+
 private:
 	int attackType; // 공격 종류
 	double m_fual; // 연료
+
+	// 공격하는 텀 - 2026, 05, 31
+	int m_AttackSpeed;
 
 	double m_length[MAX_ROCKS]; // 플레이어와 암석 사이의 거리
 };

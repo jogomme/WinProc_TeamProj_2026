@@ -20,6 +20,10 @@ Player::Player()
 	{
 		m_length[i] = INF;
 	}
+
+	//2026,05,31
+	// 1초에 1발은 쏜다는 것을 목표로 설정
+	m_AttackSpeed = 1000;
 }	
 
 Player::~Player()
@@ -32,7 +36,7 @@ void Player::SetLength(const Rock& r)
 {
 	double dx = m_x - r.GetX();
     double dy = m_y - r.GetY();
-	m_length[r.GetID()] = dx * dx + dy * dy;
+	m_length[r.GetID()] = sqrt( dx * dx + dy * dy );
 
 	// 충돌 판정 - 암석의 크기를 고려해서, 
 	// 플레이어와 암석 사이의 거리가 플레이어의 크기보다 작아지는 경우 데미지를 받는다.
@@ -40,6 +44,11 @@ void Player::SetLength(const Rock& r)
 	{
 		GetDemege(r.GetAttackPower());
 	}
+}
+
+int Player::GetAttackSpeed()
+{
+	return m_AttackSpeed;
 }
 
 // 최소거리에 있는 암석의 ID 반환 함수

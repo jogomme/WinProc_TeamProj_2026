@@ -15,6 +15,9 @@
 #include "GameMap.h"
 #include "Plinko.h"
 
+// 2026,05,31
+#include "Bullet.h"
+
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";
 LPCTSTR lpszWindowName = L"Windows Program TeamProject";
@@ -69,6 +72,7 @@ std::uniform_int_distribution<int> uid(0, 255);
 
 int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv);
 void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
+void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
 
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
@@ -78,19 +82,25 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 //#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 #define MAX_ROCKS 50
+#define MAX_BULLETS 150
 
 Player player;
 Rock rock[MAX_ROCKS];
+Bullet bullet[MAX_BULLETS];
 
 // 현재 마우스 커서의 위치
 int xPos{};
 int yPos{};
+
+// 현재 최대 총알 갯수
+int BulletCnt{};
 
 // 게임 상태 변수
 bool isGaming = false;
 
 // 캐릭터들 상태 타이머 변수
 const int GoMove{ 1 };
+const int GoAttack{ 2 };
 const int GoShow{ -1 };
 
 //-----------------------------------------------------------------------------------------------
@@ -282,22 +292,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// 전투 화면
 		// 게임 시작
 		else if (window_scene == 2) {
-			// 강제 사망 (임시)
-			if (mx > rectView.left + 5 && mx < rectView.left + 35 &&
-				my > rectView.top + 50 && my < rectView.top + 80) {
-				window_scene = 1;
-			}
-
-			if (!isGaming) {
-
-				isGaming = true;
-
-				for (int i = 0; i < MAX_ROCKS; ++i) {
-					rock[i].Spawn();
-				}
-
-				SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
-			}
+			GameStart(hWnd, rectView, mx, my, window_scene);
+			// 이 변수는 잘 모르겠어서 그대로 놔둡니다.
 		}
 
 		// 설정 화면
@@ -326,7 +322,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			drag_start.y = my;
 		}
 
-		InvalidateRect(hWnd, NULL, false);
+		//InvalidateRect(hWnd, NULL, false);
 		break;
 
 	case WM_LBUTTONUP:
@@ -431,7 +427,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			// 총알
 			{
+				HBRUSH bBrush = CreateSolidBrush(RGB(0, 255, 0));
+				HBRUSH oldbBrush = (HBRUSH)SelectObject(mDC, bBrush);
 
+				for (int i = 0; i < MAX_BULLETS; ++i) {
+					if (bullet[i].GetIsActive()) {
+						int bx = bullet[i].GetX();
+						int by = bullet[i].GetY();
+						int bs = bullet[i].GetSize();
+						Ellipse(mDC, bx - bs, by - bs, bx + bs, by + bs);
+					}
+				}
+				DeleteObject(bBrush);
 			}
 
 			// 체력바
@@ -528,7 +535,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 //----------------------------------------------------------------------------
 void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
-//----------------------------------------------------------------------------
+	//----------------------------------------------------------------------------
 	HDC hDC;
 	HBRUSH MyBrush, OldBrush;
 	RECT rect;
@@ -545,9 +552,12 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 		for (int i = 0; i < MAX_ROCKS; ++i) {
 			player.SetLength(rock[i]);
-			rock[i].Move(width,height);
+			rock[i].Move(width, height);
 		}
 		rock[0].show();
+	}
+	else if (idEvent == GoAttack) {
+		NULL;
 	}
 
 	ReleaseDC(hWnd, hDC);
@@ -560,4 +570,25 @@ int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv)
 		return rectViewMid.x + xy * intrv;
 	else
 		return rectViewMid.y + xy * intrv;
+}
+
+void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
+{
+	// 강제 사망 (임시)
+	if (mx > rectView.left + 5 && mx < rectView.left + 35 &&
+		my > rectView.top + 50 && my < rectView.top + 80) {
+		window_scene = 1;
+	}
+
+	if (!isGaming) {
+
+		isGaming = true;
+
+		for (int i = 0; i < MAX_ROCKS; ++i) {
+			rock[i].Spawn();
+		}
+
+		SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
+		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
+	}
 }

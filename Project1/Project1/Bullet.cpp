@@ -79,7 +79,7 @@ void Bullet::CheckBoundary(int width, int height)
 }
 
 // Getter
-int Bullet::GetIsActive() const 
+bool Bullet::GetIsActive() const 
 {
 	return isActive;
 }
