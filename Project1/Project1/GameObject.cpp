@@ -3,7 +3,7 @@
 #include  "GameObject.h"
 
 // 무한
-#define INF 9999
+#define INF 999
 
 GameObject::GameObject()
 	: m_hp(3), m_x(INF), m_y(INF), m_speed(0), m_attackPower(1)

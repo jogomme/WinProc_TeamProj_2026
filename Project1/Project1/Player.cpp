@@ -4,6 +4,8 @@
 #include <iostream>
 #include <math.h>
 
+#define INF 999
+
 Player::Player()
 {
 	m_attackPower = 1;
@@ -28,7 +30,9 @@ Player::~Player()
 // 플레이어와 암석 사이의 거리 계산 함수
 void Player::SetLength(const Rock& r)
 {
-	m_length[r.GetID()] = sqrt(pow(m_x - r.GetX(), 2) + pow(m_y - r.GetY(), 2));
+	double dx = m_x - r.GetX();
+    double dy = m_y - r.GetY();
+	m_length[r.GetID()] = dx * dx + dy * dy;
 
 	// 충돌 판정 - 암석의 크기를 고려해서, 
 	// 플레이어와 암석 사이의 거리가 플레이어의 크기보다 작아지는 경우 데미지를 받는다.
@@ -41,25 +45,15 @@ void Player::SetLength(const Rock& r)
 // 최소거리에 있는 암석의 ID 반환 함수
 int Player::GetMinLengthID()
 {
-	double copy[MAX_ROCKS];
-	double best = INF; 
+	double best = INF;
 	int bestId = -1;
-	memcpy(copy, m_length, sizeof(m_length));
-
-	qsort(copy, MAX_ROCKS, sizeof(double), [](const void* a, const void* b) {
-		double da = *(double*)a;
-		double db = *(double*)b;
-		if (da < db) return -1;
-		else if (da > db) return 1;
-		else return 0;
-		}
-	);
 
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
-		if (m_length[i] < best && m_length[i] < INF)
+		if (m_length[i] < best && m_length[i] != INF) // INF와 같지 않을 때만 비교
 		{
-			best = m_length[i]; bestId = i;
+			best = m_length[i];
+			bestId = i;
 		}
 	}
 
@@ -79,8 +73,6 @@ void Player::attack(Rock& r)
 		GetDemege(1);
 		return;
 	}
-
-
 
 	// attckType이 0이면 기본 공격
 	if (attackType == 0)
@@ -154,4 +146,3 @@ void Player::SetAttackPower(double deg)
 {
 	m_attackPower += deg;
 }
-

@@ -1,6 +1,12 @@
 #pragma once
 #include "GameMap.h"
 
+struct Point
+{
+	int x;
+	int y;
+};
+
 class GameObject : public GameMap
 {
 public:

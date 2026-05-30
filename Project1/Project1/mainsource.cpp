@@ -60,14 +60,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 // 랜덤값 선언 구간
 //-----------------------------------------------------------------------------------------------
 
-std::default_random_engine(time());
+std::default_random_engine dre(time(NULL));
 std::uniform_int_distribution<int> uid(0, 255);
 
 //-----------------------------------------------------------------------------------------------
 // 함수 선언 구간
 //-----------------------------------------------------------------------------------------------
 
-int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv);
+int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv);
 void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 
 //-----------------------------------------------------------------------------------------------
@@ -106,10 +106,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static HBRUSH hBrush[10], oldBrush;
 	static HFONT hFont, oldFont;
 
-	static POINT point[10]; // Polygon 함수를 위한 변수. 그때그때 좌표 적어서 활용
+	static Point point[10]; // Polygon 함수를 위한 변수. 그때그때 좌표 적어서 활용
 
 	static RECT rectView; // "보이는" 화면 크기
-	static POINT rectViewMid; // "보이는" 화면 중앙
+	static Point rectViewMid; // "보이는" 화면 중앙
 	static SIZE size; // 화면 사이즈 변경시. WM_SIZE
 	static int mx, my; // 마우스 클릭 좌표
 	static int timercnt; // 타이머 갯수, 종료 및 초기화 등에서 KillTimer 함수를 위한 갯수를 저장. WM_CREATE 에서 갯수 저장할 것
@@ -129,7 +129,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int enforce_intrv; // 버튼 사이 간격
 	static int enforce_cnt; // 강화 버튼 갯수
 	static int drag; // 마우스 드래그 중인지 체크
-	static POINT drag_start; // 드래그 시작점 저장
+	static Point drag_start; // 드래그 시작점 저장
 
 	static int return_setting; // 세팅 화면에 오기 전, 어디 화면 이었는지 저장
 
@@ -500,7 +500,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_TIMER:
 		switch (wParam) {
 		case 1:
-			player.Move(xPos, yPos);
+			//player.Move(xPos, yPos);
 			break;
 		}
 
@@ -545,7 +545,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 		for (int i = 0; i < MAX_ROCKS; ++i) {
 			player.SetLength(rock[i]);
-			rock[i].Move(xPos,yPos);
+			rock[i].Move(width,height);
 		}
 		rock[0].show();
 	}
@@ -554,7 +554,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	InvalidateRect(hWnd, NULL, false);
 }
 
-int Enforce_Point_Calc(POINT rectViewMid, char c, int xy, int intrv)
+int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv)
 {
 	if (c == 'x')
 		return rectViewMid.x + xy * intrv;

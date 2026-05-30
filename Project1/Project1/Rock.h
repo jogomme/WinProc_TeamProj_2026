@@ -37,12 +37,17 @@ public:
 	// 운석 위치 세팅 함수
 	void SetRockPos();
 
+	void CheckBoundary(int widths, int heights);
+
 private:
 	int id; // 암석 고유 번호
 	static int gid; // 암석 고유 번호를 위한 전역 변수
 	double direction[2]; // 암석이 이동하는 방향, x, y 좌표이다.
 
 	double m_price; // 가격
+
+	// 현재 그려지고 있는지 알려주는 변수
+	bool isActive;
 
 	const int m_MaxRockType = 4; // 암석의 최대 종류
 	int m_RockType; // 현재 내가 어떤 암석인지

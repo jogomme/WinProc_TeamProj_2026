@@ -8,6 +8,8 @@
 #define width 1280
 #define height 800
 
+#define INF 999
+
 std::default_random_engine generate(time(NULL)); // 난수 생성기 초기화
 std::uniform_int_distribution<int> minRockDist(0, 3); // 0, 1, 2 중에서 랜덤한 정수를 생성하는 분포
 
@@ -27,7 +29,7 @@ std::uniform_int_distribution<int> xPosDist(0, 1280);
 std::uniform_int_distribution<int> yPosDist(0, 800);
 
 // 운석 생성시 생기는 공간 텀
-std::uniform_int_distribution<int> PlusPosDist(0, 30);
+std::uniform_int_distribution<int> PlusPosDist(30, 90);
 
 int Rock::gid{ 0 }; // 암석 고유 번호를 위한 변수 초기화
 
@@ -35,6 +37,7 @@ Rock::Rock()
 	: id{ gid++ }
 {
 	m_size = 20;
+	isActive = false;
 }
 
 Rock::~Rock()
@@ -54,6 +57,8 @@ void Rock::Spawn()
 			break;
 		}
 	}
+
+	isActive = true;
 
 	// 암석의 종류에 맞춰서 체력과 가격 설정
 	if (m_RockType == 0) {
@@ -107,6 +112,8 @@ void Rock::Move(double x, double y)
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 	m_x += direction[0] * m_speed;
 	m_y += direction[1] * m_speed;
+
+	CheckBoundary(x, y);
 }
 
 void Rock::UnlockRockType(int rockType)
@@ -139,5 +146,16 @@ void Rock::SetRockPos()
 	else if (pos == 4) {
 		m_y = yPosDist(generate);
 		m_x = width + PlusPosDist(generate);
+	}
+}
+
+void Rock::CheckBoundary(int widths, int heights)
+{
+	if (isActive) {
+		// 화면 밖으로 완전히 나갔다면
+		if (m_x < 0 - 100 || m_x > widths + 100 || m_y < 0 - 100 || m_y > heights + 100) {
+			// 재생성
+			Spawn();
+		}
 	}
 }
