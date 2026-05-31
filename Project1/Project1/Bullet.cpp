@@ -8,7 +8,7 @@
 
 Bullet::Bullet()
 {
-	m_speed = 10;
+	m_speed = 30;
 
 	isActive = false;
 

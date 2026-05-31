@@ -79,7 +79,7 @@ void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
 //-----------------------------------------------------------------------------------------------
 
 // 콘솔 창 띄우는 용도입니다. Debug 용도입니다.
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 #define MAX_ROCKS 50
 #define MAX_BULLETS 150
