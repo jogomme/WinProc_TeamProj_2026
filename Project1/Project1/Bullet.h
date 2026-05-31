@@ -36,10 +36,19 @@ public :
 	
 	// Getter 함수
 	bool GetIsActive() const;
+	
+	// 운석과 총알의 거리 체크 함수
+	double GetLength(const Rock& r);
 
+	// 충돌 체크 함수
+	void Crash(Rock& r);
+
+	
 private :
 	// 방향 벡터
 	double m_direction[2];
+
+	double m_AttackPower;
 
 	// 발사되고 있는 상태인지 알려주는 변수
 	bool isActive;

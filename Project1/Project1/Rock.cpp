@@ -47,6 +47,11 @@ Rock::~Rock()
 	GameMap::m_rockNum++;
 }
 
+bool Rock::GetActive() const
+{
+	return isActive;
+}
+
 void Rock::Spawn()
 {
 	// 지금 해금된 암석 종류에 맞춰서 랜덤값으로 암석의 종류 선정
@@ -109,6 +114,10 @@ void Rock::setDirection(int X, int Y)
 // 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 void Rock::Move(double x, double y)
 {
+	if (m_hp <= 0) {
+		isActive = false;
+	}
+
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 	m_x += direction[0] * m_speed;
 	m_y += direction[1] * m_speed;

@@ -34,15 +34,21 @@ Player::~Player()
 // 플레이어와 암석 사이의 거리 계산 함수
 void Player::SetLength(const Rock& r)
 {
-	double dx = m_x - r.GetX();
-    double dy = m_y - r.GetY();
-	m_length[r.GetID()] = sqrt( dx * dx + dy * dy );
+	if (r.GetActive()) {
+		double dx = m_x - r.GetX();
+		double dy = m_y - r.GetY();
+		m_length[r.GetID()] = sqrt(dx * dx + dy * dy);
 
-	// 충돌 판정 - 암석의 크기를 고려해서, 
-	// 플레이어와 암석 사이의 거리가 플레이어의 크기보다 작아지는 경우 데미지를 받는다.
-	if (m_length[r.GetID()] - r.GetSize() < m_size)
-	{
-		GetDemege(r.GetAttackPower());
+		// 충돌 판정 - 암석의 크기를 고려해서, 
+		// 플레이어와 암석 사이의 거리가 플레이어의 크기보다 작아지는 경우 데미지를 받는다.
+		if (m_length[r.GetID()] - r.GetSize() < m_size)
+		{
+			GetDemege(r.GetAttackPower());
+		}
+
+	}
+	else {
+		m_length[r.GetID()] = INF;
 	}
 }
 
@@ -92,7 +98,7 @@ void Player::attack(Rock& r)
 		}
 	}
 	else if (attackType == 1) {
-
+		NULL;
 	}
 }
 
@@ -154,4 +160,9 @@ void Player::SetSpeed(double deg)
 void Player::SetAttackPower(double deg)
 {
 	m_attackPower += deg;
+}
+
+void Player::SetAttackSpeed(double deg)
+{
+	m_AttackSpeed -= deg;
 }

@@ -17,6 +17,8 @@ Bullet::Bullet()
 
 	m_hp = INF;
 	m_attackPower = 1;
+
+	m_size = 10;
 }
 
 Bullet::~Bullet()
@@ -29,6 +31,8 @@ void Bullet::Spawn(const Player& p, const Rock& r)
 {
 	int px = p.GetX();
 	int py = p.GetY();
+
+	m_attackPower = p.GetAttackPower();
 
 	isActive = true;
 
@@ -44,6 +48,18 @@ void Bullet::Move(double xPos, double yPos)
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 	m_x += m_direction[0] * m_speed;
 	m_y += m_direction[1] * m_speed;
+
+	CheckBoundary(xPos, yPos);
+}
+
+double Bullet::GetLength(const Rock& r)
+{
+	int rx = r.GetX();
+	int ry = r.GetY();
+
+	double dx = rx - m_x;
+	double dy = ry - m_y;
+	return sqrt(dx * dx + dy * dy);
 }
 
 // 방향벡터 생성 후 정규화
@@ -82,4 +98,16 @@ void Bullet::CheckBoundary(int width, int height)
 bool Bullet::GetIsActive() const 
 {
 	return isActive;
+}
+
+void Bullet::Crash(Rock& r)
+{
+	if (r.GetActive()) {
+		double distance = GetLength(r);
+
+		if (distance - r.GetSize() < m_size) {
+			r.GetDemege(m_attackPower);
+			isActive = false;
+		}
+	}
 }

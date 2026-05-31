@@ -79,7 +79,7 @@ void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
 //-----------------------------------------------------------------------------------------------
 
 // 콘솔 창 띄우는 용도입니다. Debug 용도입니다.
-//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 #define MAX_ROCKS 50
 #define MAX_BULLETS 150
@@ -400,10 +400,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
 				HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
 				for (int i = 0; i < MAX_ROCKS; ++i) {
-					int rx = rock[i].GetX();
-					int ry = rock[i].GetY();
-					int rs = rock[i].GetSize();
-					Rectangle(mDC, rx - rs, ry - rs, rx + rs, ry + rs);
+					if (rock[i].GetActive()) {
+						int rx = rock[i].GetX();
+						int ry = rock[i].GetY();
+						int rs = rock[i].GetSize();
+						Rectangle(mDC, rx - rs, ry - rs, rx + rs, ry + rs);
+					}
 				}
 				DeleteObject(rBRUSH);
 			}
@@ -545,19 +547,47 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	if (idEvent == GoMove) {
 		if (player.GetHP() <= 0) {
 			KillTimer(hWnd, GoMove);
+			KillTimer(hWnd, GoAttack);
 			isGaming = false;
 		}
 
 		player.Move(xPos, yPos);
 
+		
+
 		for (int i = 0; i < MAX_ROCKS; ++i) {
 			player.SetLength(rock[i]);
+
 			rock[i].Move(width, height);
 		}
-		rock[0].show();
+
+		for (int i = 0; i < MAX_BULLETS; ++i) {
+			if (bullet[i].GetIsActive()) {
+
+				for (int j = 0; j < MAX_ROCKS; ++j) {
+					bullet[i].Crash(rock[j]);
+				}
+
+				bullet[i].Move(width, height);
+
+			}
+		}
 	}
 	else if (idEvent == GoAttack) {
-		NULL;
+
+		int targetRockID = player.GetMinLengthID();
+
+		if (targetRockID != -1) {
+
+			for (int i = 0; i < MAX_BULLETS; i++) {
+				if (!bullet[i].GetIsActive()) {
+
+					bullet[i].Spawn(player, rock[targetRockID]);
+
+					break; 
+				}
+			}
+		}
 	}
 
 	ReleaseDC(hWnd, hDC);

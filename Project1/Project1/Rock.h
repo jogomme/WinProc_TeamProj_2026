@@ -21,6 +21,7 @@ public:
 
 	// Getter 함수
 	int GetID() const;// 완
+	bool GetActive() const;
 
 	// 암석이 이동하는 방향 설정 함수
 	void setDirection(int X, int Y); // 완

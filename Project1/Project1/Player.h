@@ -40,6 +40,7 @@ public:
 	void SetFual(double deg); // 연료 설정 함수
 	void SetSpeed(double deg); // 속도 설정 함수
 	void SetAttackPower(double deg); // 공격력 설정 함수
+	void SetAttackSpeed(double deg);
 
 
 	// 이동 함수
