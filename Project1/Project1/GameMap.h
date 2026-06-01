@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include<iostream>
+#include<Windows.h>
 
 #define MAX_ROCKS 50
 

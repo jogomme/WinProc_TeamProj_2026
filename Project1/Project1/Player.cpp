@@ -9,7 +9,7 @@
 Player::Player()
 {
 	m_attackPower = 1;
-	m_hp = 1;
+	max_hp = 1;
 	m_speed = 10;
 	m_x = 690;
 	m_y = 400;
@@ -73,6 +73,22 @@ int Player::GetMinLengthID()
 	}
 
 	return bestId;
+}
+
+void Player::Spawn()
+{
+	m_hp = max_hp;
+	m_x = 690;
+	m_y = 400;
+	attackType = 0;
+	m_size = 20;
+	m_fual = 100;
+	for (int i = 0; i < MAX_ROCKS; i++)
+	{
+		m_length[i] = INF;
+	}
+
+	m_AttackSpeed = 1000;
 }
 
 void Player::attack(Rock& r)

@@ -553,8 +553,6 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 		player.Move(xPos, yPos);
 
-		
-
 		for (int i = 0; i < MAX_ROCKS; ++i) {
 			player.SetLength(rock[i]);
 
@@ -611,6 +609,8 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 	}
 
 	if (!isGaming) {
+
+		player.Spawn();
 
 		isGaming = true;
 

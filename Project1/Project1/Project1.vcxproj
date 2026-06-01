@@ -150,6 +150,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Plinko.cpp" />
     <ClCompile Include="Rock.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -159,6 +160,7 @@
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Plinko.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Rock.h" />
   </ItemGroup>

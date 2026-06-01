@@ -42,6 +42,7 @@ public:
 	void SetAttackPower(double deg); // 공격력 설정 함수
 	void SetAttackSpeed(double deg);
 
+	void Spawn();
 
 	// 이동 함수
 	virtual void Move(double x, double y) override;
@@ -53,6 +54,8 @@ public:
 private:
 	int attackType; // 공격 종류
 	double m_fual; // 연료
+
+	int max_hp;
 
 	// 공격하는 텀 - 2026, 05, 31
 	int m_AttackSpeed;
