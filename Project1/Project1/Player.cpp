@@ -163,6 +163,7 @@ void Player::ConsumeFual()
 	m_fual -= (1 + stage * 1.2 );
 	if (m_fual < 0) {
 		m_fual = 0;
+		m_hp = 0;
 	}
 }
 
