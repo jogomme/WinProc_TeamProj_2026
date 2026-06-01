@@ -22,6 +22,8 @@ public:
 	// Getter 함수
 	int GetID() const;// 완
 	bool GetActive() const;
+	double GetPrice() const;
+	int GetRockType() const;
 
 	// 암석이 이동하는 방향 설정 함수
 	void setDirection(int X, int Y); // 완
@@ -49,6 +51,8 @@ private:
 
 	// 현재 그려지고 있는지 알려주는 변수
 	bool isActive;
+
+	int FeedNum;
 
 	const int m_MaxRockType = 4; // 암석의 최대 종류
 	int m_RockType; // 현재 내가 어떤 암석인지

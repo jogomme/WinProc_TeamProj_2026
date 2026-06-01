@@ -4,6 +4,7 @@
 #include "GameMap.h"
 #include <time.h>
 #include<random>
+#include"Feed.h"
 
 #define width 1280
 #define height 800
@@ -29,7 +30,7 @@ std::uniform_int_distribution<int> xPosDist(0, 1280);
 std::uniform_int_distribution<int> yPosDist(0, 800);
 
 // 운석 생성시 생기는 공간 텀
-std::uniform_int_distribution<int> PlusPosDist(30, 90);
+std::uniform_int_distribution<int> PlusPosDist(30, 120);
 
 int Rock::gid{ 0 }; // 암석 고유 번호를 위한 변수 초기화
 
@@ -162,9 +163,18 @@ void Rock::CheckBoundary(int widths, int heights)
 {
 	if (isActive) {
 		// 화면 밖으로 완전히 나갔다면
-		if (m_x < 0 - 100 || m_x > widths + 100 || m_y < 0 - 100 || m_y > heights + 100) {
+		if (m_x < 0 - 130 || m_x > widths + 130 || m_y < 0 - 130 || m_y > heights + 130) {
 			// 재생성
 			Spawn();
 		}
 	}
+}
+
+double Rock::GetPrice() const
+{
+	return m_price;
+}
+int Rock::GetRockType() const
+{
+	return m_RockType;
 }

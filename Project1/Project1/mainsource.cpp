@@ -73,6 +73,7 @@ std::uniform_int_distribution<int> uid(0, 255);
 int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv);
 void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
+void GameOver(HWND hWnd, int& WindSinec);
 
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
@@ -101,7 +102,11 @@ bool isGaming = false;
 // 캐릭터들 상태 타이머 변수
 const int GoMove{ 1 };
 const int GoAttack{ 2 };
+const int GoConsumeFual{ 3 };
 const int GoShow{ -1 };
+
+// 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창
+int window_scene{0};
 
 //-----------------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -124,7 +129,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int mx, my; // 마우스 클릭 좌표
 	static int timercnt; // 타이머 갯수, 종료 및 초기화 등에서 KillTimer 함수를 위한 갯수를 저장. WM_CREATE 에서 갯수 저장할 것
 
-	static int window_scene; // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창
 
 	// 강화 버튼
 	struct Enforce {
@@ -240,8 +244,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (window_scene == 0) {
 			if (mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
 				my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
-
-				window_scene = 2;
+				GameStart(hWnd, rectView, mx, my, window_scene);
 			}
 			else if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
 				my>rectViewMid.y + 30 && my < rectViewMid.y + 70) {
@@ -257,6 +260,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 전투 진입 버튼 클릭
 			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
 				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
+				GameStart(hWnd, rectView, mx, my, window_scene);
 				window_scene = 2;
 			}
 
@@ -288,14 +292,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				drag_start.y = my;
 			}
 		}
-
-		// 전투 화면
-		// 게임 시작
-		else if (window_scene == 2) {
-			GameStart(hWnd, rectView, mx, my, window_scene);
-			// 이 변수는 잘 모르겠어서 그대로 놔둡니다.
-		}
-
 		// 설정 화면
 		else if (window_scene == 3) {
 			if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
@@ -320,9 +316,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 			drag_start.x = mx;
 			drag_start.y = my;
-		}
 
-		//InvalidateRect(hWnd, NULL, false);
+		}
+		if (window_scene == 1) {
+			InvalidateRect(hWnd, NULL, false);
+
+		}
 		break;
 
 	case WM_LBUTTONUP:
@@ -443,24 +442,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				DeleteObject(bBrush);
 			}
 
-			// 체력바
+			// 연료바
 			{
+				// 플레이어의 현재 연료 수치
+				double pF = player.GetFual();
+
+				// 플레이어의 최대 연료 수치
+				double pMF = player.GetMaxFual();
+
+				// 현재 비율
+				double FualRate = pF / pMF;
+
 				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
 				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
 
 				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
 				//current_hp max_hp <- 임의로 지어둔 이름
 				//Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (float)(max_hp-current_hp)*400, rectView.top + 45);
-				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + 0.65 * 400, rectView.top + 45);
+				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (FualRate) * 400, rectView.top + 45);
 
 				oldFont = (HFONT)SelectObject(mDC, hFont);
 				SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+				std::cout << FualRate << '\n';
 
 				wchar_t str[64];
 				// 플레이어 현재 체력 / 최대 체력 (연료)
 				//current_hp max_hp <- 임의로 지어둔 이름
 				//wsprintf(str, L"%d / %d", current_hp, max_hp);
-				wsprintf(str, L"0 / 0");
+				wsprintf(str, L"%d / %d", player.GetFual(), player.GetMaxFual());
 				TextOut(mDC, rectView.left + 165, rectView.top + 15, str, lstrlen(str));
 			}
 
@@ -544,11 +554,13 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	hDC = GetDC(hWnd);
 	GetClientRect(hWnd, &rect);
 
+	//--------------------------------------------------------------------
+	//  이동 관련 타이머
+	//--------------------------------------------------------------------
 	if (idEvent == GoMove) {
 		if (player.GetHP() <= 0) {
-			KillTimer(hWnd, GoMove);
-			KillTimer(hWnd, GoAttack);
-			isGaming = false;
+			GameOver(hWnd, window_scene);
+			return;
 		}
 
 		player.Move(xPos, yPos);
@@ -571,6 +583,9 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			}
 		}
 	}
+	//--------------------------------------------------------------------
+	//  공격 관련 타이머
+	//--------------------------------------------------------------------
 	else if (idEvent == GoAttack) {
 
 		int targetRockID = player.GetMinLengthID();
@@ -586,6 +601,12 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 				}
 			}
 		}
+	}
+	//--------------------------------------------------------------------
+	//  연료 소비 관련 타이머
+	//--------------------------------------------------------------------
+	else if (idEvent == GoConsumeFual) {
+		player.ConsumeFual();
 	}
 
 	ReleaseDC(hWnd, hDC);
@@ -603,12 +624,15 @@ int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv)
 void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 {
 	// 강제 사망 (임시)
-	if (mx > rectView.left + 5 && mx < rectView.left + 35 &&
-		my > rectView.top + 50 && my < rectView.top + 80) {
+	if ((mx > rectView.left + 5 && mx < rectView.left + 35 &&
+		my > rectView.top + 50 && my < rectView.top + 80)) {
 		window_scene = 1;
 	}
 
 	if (!isGaming) {
+		window_scene = 2;
+
+		SetCursorPos(width / 2, height / 2);
 
 		player.Spawn();
 
@@ -618,7 +642,23 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 			rock[i].Spawn();
 		}
 
+		for (int i = 0; i < MAX_BULLETS; ++i) {
+			bullet[i].SetActive(false); 
+		}
+
 		SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
+		SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
 	}
+}
+
+void GameOver(HWND hWnd, int& WinSince)
+{
+	KillTimer(hWnd, GoMove);
+	KillTimer(hWnd, GoAttack);
+	KillTimer(hWnd, GoConsumeFual);
+
+	WinSince = 1;
+
+	isGaming = false;
 }

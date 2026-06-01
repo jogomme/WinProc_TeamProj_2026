@@ -30,6 +30,9 @@ public:
 
 	int GetAttackSpeed();
 
+	int GetMaxFual();
+	int GetFual();
+
 	//최소 거리에 있는 암석의 위치 반환 함수
 	Point GetMinLengthRock();
 	
@@ -48,12 +51,13 @@ public:
 	virtual void Move(double x, double y) override;
 
 	// 연로 감소 함수 - 스테이지에 비례해 연료 감소량이 증가함
-	void ConsumeFual(int stage);
+	void ConsumeFual();
 
 
 private:
 	int attackType; // 공격 종류
 	double m_fual; // 연료
+	double m_MaxFual;
 
 	int max_hp;
 

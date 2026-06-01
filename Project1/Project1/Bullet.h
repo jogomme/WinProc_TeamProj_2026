@@ -27,6 +27,8 @@ public :
 	// 생성 함수
 	void Spawn(const Player& p, const Rock& r);
 	
+	void SetActive(bool b);
+
 	// 위치 재정의 밑 소멸 함수
 	void SetPos();
 

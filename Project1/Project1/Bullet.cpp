@@ -80,6 +80,11 @@ void Bullet::SetDir(const Rock& r)
 	m_direction[1] = dy / distance;
 }
 
+void Bullet::SetActive(bool b)
+{
+	isActive = b;
+}
+
 
 // 화면 밖으로 나갔는지 체크하는 함수
 void Bullet::CheckBoundary(int width, int height) 

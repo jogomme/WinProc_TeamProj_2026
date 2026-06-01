@@ -15,7 +15,7 @@ Player::Player()
 	m_y = 400;
 	attackType = 0;
 	m_size = 20;
-	m_fual = 100;
+	m_MaxFual = 100;
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
 		m_length[i] = INF;
@@ -52,6 +52,7 @@ void Player::SetLength(const Rock& r)
 	}
 }
 
+// Getter
 int Player::GetAttackSpeed()
 {
 	return m_AttackSpeed;
@@ -75,6 +76,16 @@ int Player::GetMinLengthID()
 	return bestId;
 }
 
+int Player::GetFual()
+{
+	return m_fual;
+}
+
+int Player::GetMaxFual()
+{
+	return m_MaxFual;
+}
+
 void Player::Spawn()
 {
 	m_hp = max_hp;
@@ -82,7 +93,7 @@ void Player::Spawn()
 	m_y = 400;
 	attackType = 0;
 	m_size = 20;
-	m_fual = 100;
+	m_fual = m_MaxFual;
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
 		m_length[i] = INF;
@@ -146,8 +157,9 @@ void Player::Move(double targetX, double targetY)
 	m_y += dirY * m_speed;
 }
 
-void Player::ConsumeFual(int stage)
+void Player::ConsumeFual()
 {
+	int stage = GameMap::GetStage();
 	m_fual -= (1 + stage * 1.2 );
 	if (m_fual < 0) {
 		m_fual = 0;
