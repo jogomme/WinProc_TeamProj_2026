@@ -1,5 +1,9 @@
 #include "Enforce.h"
+#include "GameObject.h"
+
 #include <iostream>
+#include <Windows.h>
+
 
 Enforce::Enforce()
 {
@@ -56,6 +60,11 @@ void Enforce::Set_Pos(double a, double b)
 	x = a;
 	y = b;
 }
+void Enforce::Move_Mid_Pos(Point rectViewMid, int intrv)
+{
+	x = rectViewMid.x + x * intrv;
+	y = rectViewMid.y + y * intrv;
+}
 void Enforce::Set_TAP(int t, int a, int p)
 {
 	type = t;
@@ -64,11 +73,17 @@ void Enforce::Set_TAP(int t, int a, int p)
 }
 void Enforce::Set_Draw(int a)
 {
-	draw = a;
+	if (a >= 0) {
+		draw = a;
+	}
 }
 void Enforce::Set_Drawing(int a, int b, int c)
 {
 	drawing[0] = a;
 	drawing[1] = b;
 	drawing[2] = c;
+}
+void Enforce::Set_Open(int a)
+{
+	open = a;
 }

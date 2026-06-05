@@ -3,6 +3,8 @@
 #include<iostream>
 #include<Windows.h>
 
+#include "GameObject.h"
+
 class Enforce
 {
 public:
@@ -22,15 +24,17 @@ public:
 	int Get_Enforce_Drawing(int);
 	int Get_Enforce_Open();
 
-	void Set_Pos(double, double);
-	void Set_TAP(int, int, int);
-	void Set_Draw(int);
-	void Set_Drawing(int, int, int);
+	void Set_Pos(double, double); // 위치 지정 함수
+	void Move_Mid_Pos(Point rectViewMid, int intrv); // Set_Pos 기반 중앙 위치 이동 함수
+	void Set_TAP(int, int, int); // type, amount, price 지정 함수
+	void Set_Draw(int); // draw 지정
+	void Set_Drawing(int, int, int); // 강화시 그릴 버튼 지정 함수 최대 3개
+	void Set_Open(int); // open 지정
 
 protected:
 	double x, y; // 버튼의 위치 배율 (최초 노드는 0,0)
-	int type; // ex) 0-미사용 노드 1-공격, 2-방어, 3-체력, 4,5,6,7,,,-특수능력 등등
-	int amount; // type 의 직접적인 수치 ex) 공격력 3 / 방어력 2 / 특수능력 1 해금 2 해금 등등;
+	int type; // 강화 할 타입
+	int amount; // type 의 직접적인 수치
 	int price; // 가격
 
 	int draw; // 현재 이 버튼을 그려낼 것인지

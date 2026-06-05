@@ -85,10 +85,12 @@ void GameOver(HWND hWnd, int& WindSinec);
 
 #define MAX_ROCKS 50
 #define MAX_BULLETS 150
+#define MAX_ENFORCE 500
 
 Player player;
 Rock rock[MAX_ROCKS];
 Bullet bullet[MAX_BULLETS];
+Enforce enforce[MAX_ENFORCE];
 
 // 현재 마우스 커서의 위치
 int xPos{};
@@ -132,18 +134,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 
 	// 강화 버튼
-	struct Enforce {
-		float x, y; // 버튼의 위치 배율 (최초 노드는 0,0)
-		int type; // ex) 0-미사용 노드 1-공격, 2-방어, 3-체력, 4,5,6,7,,,-특수능력 등등
-		int amount; // type 의 직접적인 수치 ex) 공격력 3 / 방어력 2 / 특수능력 1 해금 2 해금 등등;
-		int draw; // 현재 이 버튼을 그려낼 것인지 ex) 근처의 노드를 열면 1을 주어 그리도록 // 3진 트리
-		int open; // 현재 이 버튼이 강화가 되었는지
-		int price;
-	};
-	static Enforce enforce[20000];
 	static int enforce_size; // 버튼의 반지름 크기
 	static int enforce_intrv; // 버튼 사이 간격
-	static int enforce_cnt; // 강화 버튼 갯수
 	static int drag; // 마우스 드래그 중인지 체크
 	static Point drag_start; // 드래그 시작점 저장
 
@@ -187,31 +179,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		// 강화 버튼 관련
 		{
-			enforce_cnt = 20;
 			enforce_size = 20;
 			enforce_intrv = 80;
-			// type 0-미사용 노드 1-공격, 2-방어, 3-체력, 4,5,6,7,,,-특수능력 등등
-			// 사용법 // (화면 중앙 포인트, xy 좌표중 택1, xy 좌표의 배율[상대적 좌표], 버튼 사이 거리)
-			// 예시작으로 5개 구현
-			enforce[0].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
-			enforce[0].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[0].type = 1; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
+			
+			//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
+			enforce[0].Set_Pos(0, 0);
+			enforce[0].Set_TAP(1, 1, 1);
+			enforce[0].Set_Draw(1);
+			enforce[0].Set_Drawing(1, 2, 3);
 
-			enforce[1].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
-			enforce[1].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[1].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[1].Set_Pos(1, 0);
+			enforce[1].Set_TAP(2, 1, 1);
+			enforce[1].Set_Drawing(-1, -1, -1);
 
-			enforce[2].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
-			enforce[2].y = Enforce_Point_Calc(rectViewMid, 'y', 1, enforce_intrv);
-			enforce[2].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[2].Set_Pos(-1, 0);
+			enforce[2].Set_TAP(3, 1, 1);
+			enforce[2].Set_Drawing(-1, -1, -1);
 
-			enforce[3].x = Enforce_Point_Calc(rectViewMid, 'x', -1, enforce_intrv);
-			enforce[3].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[3].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
-
-			enforce[4].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
-			enforce[4].y = Enforce_Point_Calc(rectViewMid, 'y', -1, enforce_intrv);
-			enforce[4].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			for (int i = 0; i < MAX_ENFORCE; i++) {
+				enforce[i].Move_Mid_Pos(rectViewMid, enforce_intrv);
+			}
 		}
 
 		drag = 0;
@@ -292,15 +279,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			// 강화 버튼 클릭
 			int ck = 0;
-			for (int i = 0; i < enforce_cnt; i++) {
-				if (mx > enforce[i].x - enforce_size && mx < enforce[i].x + enforce_size &&
-					my > enforce[i].y - enforce_size && my < enforce[i].y + enforce_size &&
-					enforce[i].draw == 1 && enforce[i].type != 0) {
+			for (int i = 0; i < MAX_ENFORCE; i++) {
+				if (mx > enforce[i].Get_Enforce_Point_x() - enforce_size && mx < enforce[i].Get_Enforce_Point_x() + enforce_size &&
+					my > enforce[i].Get_Enforce_Point_y() - enforce_size && my < enforce[i].Get_Enforce_Point_y() + enforce_size &&
+					enforce[i].Get_Enforce_Draw() == 1 && enforce[i].Get_Enforce_Open()==0) {
+					// 가격 관련 조건, 마이너스 필요
 					ck = 1;
-					enforce[i].open = 1;
-					enforce[i * 3 + 1].draw = 1;
-					enforce[i * 3 + 2].draw = 1;
-					enforce[i * 3 + 3].draw = 1;
+					enforce[i].Set_Open(1);
+					enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
+					enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
+					enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
 				}
 			}
 
@@ -360,26 +348,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-			// 강화 버튼 클릭
-			int ck = 0;
-			for (int i = 0; i < enforce_cnt; i++) {
-				if (mx > enforce[i].x - enforce_size && mx < enforce[i].x + enforce_size &&
-					my > enforce[i].y - enforce_size && my < enforce[i].y + enforce_size &&
-					enforce[i].draw == 1 && enforce[i].type != 0) {
-					ck = 1;
-					enforce[i].open = 1;
-					enforce[i * 3 + 1].draw = 1;
-					enforce[i * 3 + 2].draw = 1;
-					enforce[i * 3 + 3].draw = 1;
-				}
-			}
-
-			// 빈 공간 클릭
-			if (ck == 0 && window_scene == 1) {
-				drag = 1;
-				drag_start.x = mx;
-				drag_start.y = my;
-			}
 		}
 
 		InvalidateRect(hWnd, NULL, false);
@@ -392,9 +360,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		my = HIWORD(lParam);
 
 		if (drag == 1) {
-			for (int i = 0; i < enforce_cnt; i++) {
-				enforce[i].x -= (drag_start.x - mx) / 2;
-				enforce[i].y -= (drag_start.y - my) / 2;
+			for (int i = 0; i < MAX_ENFORCE; i++) {
+				double x = enforce[i].Get_Enforce_Point_x();
+				double y = enforce[i].Get_Enforce_Point_y();
+				enforce[i].Set_Pos(x - (drag_start.x - mx) / 2, y - (drag_start.y - my) / 2);
 			}
 			drag_start.x = mx;
 			drag_start.y = my;
@@ -445,12 +414,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (window_scene == 1) {
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
 
-			for (int i = 0; i < enforce_cnt; i++) {
+			for (int i = 0; i < MAX_ENFORCE; i++) {
 				// 블럭 오픈 여부에 따른 색
-				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[8 - enforce[i].open]);
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[8 - enforce[i].Get_Enforce_Open()]);
 				// 블럭 그리기
-				if (enforce[i].draw == 1 && enforce[i].type != 0)
-					Rectangle(mDC, enforce[i].x - enforce_size, enforce[i].y - enforce_size, enforce[i].x + enforce_size, enforce[i].y + enforce_size);
+				if (enforce[i].Get_Enforce_Draw() == 1) {
+					// 타입에 따른 이미지
+					double x = enforce[i].Get_Enforce_Point_x();
+					double y = enforce[i].Get_Enforce_Point_y();
+					Rectangle(mDC, x - enforce_size, y - enforce_size, x + enforce_size, y + enforce_size);
+				}
 			}
 
 			// 전투 화면 진입 버튼
