@@ -137,6 +137,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		int amount; // type 의 직접적인 수치 ex) 공격력 3 / 방어력 2 / 특수능력 1 해금 2 해금 등등;
 		int draw; // 현재 이 버튼을 그려낼 것인지 ex) 근처의 노드를 열면 1을 주어 그리도록 // 3진 트리
 		int open; // 현재 이 버튼이 강화가 되었는지
+		int price;
 	};
 	static Enforce enforce[20000];
 	static int enforce_size; // 버튼의 반지름 크기
@@ -185,30 +186,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		// 강화 버튼 관련
 		{
-			enforce_cnt = 5;
+			enforce_cnt = 20;
 			enforce_size = 20;
 			enforce_intrv = 80;
+			// type 0-미사용 노드 1-공격, 2-방어, 3-체력, 4,5,6,7,,,-특수능력 등등
 			// 사용법 // (화면 중앙 포인트, xy 좌표중 택1, xy 좌표의 배율[상대적 좌표], 버튼 사이 거리)
 			// 예시작으로 5개 구현
 			enforce[0].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
 			enforce[0].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[0].type = 0; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
+			enforce[0].type = 1; enforce[0].amount = 1; enforce[0].draw = 1; enforce[0].open = 0;
 
 			enforce[1].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
 			enforce[1].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[1].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[1].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
 			enforce[2].x = Enforce_Point_Calc(rectViewMid, 'x', 0, enforce_intrv);
 			enforce[2].y = Enforce_Point_Calc(rectViewMid, 'y', 1, enforce_intrv);
-			enforce[2].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[2].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
 			enforce[3].x = Enforce_Point_Calc(rectViewMid, 'x', -1, enforce_intrv);
 			enforce[3].y = Enforce_Point_Calc(rectViewMid, 'y', 0, enforce_intrv);
-			enforce[3].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[3].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 
 			enforce[4].x = Enforce_Point_Calc(rectViewMid, 'x', 1, enforce_intrv);
 			enforce[4].y = Enforce_Point_Calc(rectViewMid, 'y', -1, enforce_intrv);
-			enforce[4].type = 0; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
+			enforce[4].type = 1; enforce[1].amount = 1; enforce[1].draw = 0; enforce[1].open = 0;
 		}
 
 		drag = 0;
@@ -262,6 +264,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
 				GameStart(hWnd, rectView, mx, my, window_scene);
 				window_scene = 2;
+				break;
 			}
 
 			// 세팅 진입 버튼
@@ -269,6 +272,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
 				return_setting = window_scene;
 				window_scene = 3;
+				break;
 			}
 
 			// 강화 버튼 클릭
@@ -276,7 +280,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			for (int i = 0; i < enforce_cnt; i++) {
 				if (mx > enforce[i].x - enforce_size && mx < enforce[i].x + enforce_size &&
 					my > enforce[i].y - enforce_size && my < enforce[i].y + enforce_size &&
-					enforce[i].draw == 1 && window_scene == 1) {
+					enforce[i].draw == 1 && enforce[i].type != 0) {
 					ck = 1;
 					enforce[i].open = 1;
 					enforce[i * 3 + 1].draw = 1;
@@ -291,6 +295,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				drag_start.x = mx;
 				drag_start.y = my;
 			}
+		}
+
+		else if (window_scene == 2) {
+			// 강제 사망 (임시)
+			if ((mx > rectView.left + 5 && mx < rectView.left + 35 &&
+				my > rectView.top + 50 && my < rectView.top + 80)) {
+				GameOver(hWnd, window_scene);
+			}
+
 		}
 		// 설정 화면
 		else if (window_scene == 3) {
@@ -367,7 +380,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				// 블럭 오픈 여부에 따른 색
 				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[8 - enforce[i].open]);
 				// 블럭 그리기
-				if (enforce[i].draw == 1)
+				if (enforce[i].draw == 1 && enforce[i].type != 0)
 					Rectangle(mDC, enforce[i].x - enforce_size, enforce[i].y - enforce_size, enforce[i].x + enforce_size, enforce[i].y + enforce_size);
 			}
 
@@ -623,12 +636,6 @@ int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv)
 
 void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 {
-	// 강제 사망 (임시)
-	if ((mx > rectView.left + 5 && mx < rectView.left + 35 &&
-		my > rectView.top + 50 && my < rectView.top + 80)) {
-		window_scene = 1;
-	}
-
 	if (!isGaming) {
 		window_scene = 2;
 

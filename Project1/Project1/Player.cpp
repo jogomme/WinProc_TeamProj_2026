@@ -23,7 +23,8 @@ Player::Player()
 
 	//2026,05,31
 	// 1초에 1발은 쏜다는 것을 목표로 설정
-	m_AttackSpeed = 1000;
+	//m_AttackSpeed = 1000; // 현재 공격속도 <- 공격 타입 등에서 변환하여 사용 할 수 있음
+	m_AttackSpeed_Spawn = 1000; // 강화 등을 통한 공격속도 <- 소환 되면 항시 이 속도로 시작 함
 }	
 
 Player::~Player()
@@ -99,7 +100,7 @@ void Player::Spawn()
 		m_length[i] = INF;
 	}
 
-	m_AttackSpeed = 1000;
+	m_AttackSpeed = m_AttackSpeed_Spawn; // 2026.06.05
 }
 
 void Player::attack(Rock& r)
@@ -174,9 +175,10 @@ void Player::SetAttackType(int type)
 }
 
 // 연료 증가 함수
+// 2026.06.05 최대 연료를 증가하도록 수정.
 void Player::SetFual(double deg)
 {
-	m_fual += deg;
+	m_MaxFual += deg;
 }
 
 // 속도 증가 함수
@@ -193,5 +195,5 @@ void Player::SetAttackPower(double deg)
 
 void Player::SetAttackSpeed(double deg)
 {
-	m_AttackSpeed -= deg;
+	m_AttackSpeed_Spawn -= deg;
 }

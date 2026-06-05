@@ -62,7 +62,8 @@ private:
 	int max_hp;
 
 	// 공격하는 텀 - 2026, 05, 31
-	int m_AttackSpeed;
+	int m_AttackSpeed; // 현재 공격 속도
+	int m_AttackSpeed_Spawn; // 2026.06.05 기본 공격 속도
 
 	double m_length[MAX_ROCKS]; // 플레이어와 암석 사이의 거리
 };
