@@ -1,20 +1,17 @@
 #include "Plinko.h"
 #include "Player.h"
 #include "GameObject.h"
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
-
-/*
-가격 합산 O
-구역 계산 O
-구역 그리기 O
-운석 생성 및 낙하 X
-핀볼 << 충돌처리 구현
-*/
 
 #define ROCK_SIZE 40	// 운석 사이즈
 #define GOAL_LINE 700	// 플랑코 목표 지점 Y 좌표 (m_y가 넘으면 인식)
 
-int plinkoView = 1, plinkoRunning = 0;
+#define PIN_ROWS 7		// 핀 가로 갯수
+#define PIN_COLS 7		// 핀 세로 갯수
+
+// 작동 / 시점 설정 변수
+int plinkoView = 1, plinkoRunning = 0; // 0 OFF, 1 ON
 
 // 임시 변수 (현재 가진 총 소지금)
 int userCash = 0, addPrice = 0;
@@ -41,19 +38,29 @@ struct pin {	// 튕기는 핀 위치
 	}
 };
 
-std::vector<pin> pinPos;
+std::vector<PlinkoRock*> rocks;	// 운석 저장
+std::vector<pin> pinPos;	// 핀 위치 저장
 
-PlinkoRock::PlinkoRock() {
-	p_price = m_rock[rockNum].Price;
+PlinkoRock::PlinkoRock(const MinRock& rock) {
+	p_price = rock.Price;
 	m_x = rand() % 1280;
 	m_y = 50;
+
+	m_speed = 1.0;
+
+
 }
 
 PlinkoRock::~PlinkoRock() {
 	
 }
 
-// Ellipse(hDC, m_x, m_y, m_x + ROCK_SIZE, m_y + ROCKSIZE);
+// 벡터에 rock 넣기
+void plinkoSpawn(const MinRock& rock) {
+	
+	rocks.push_back(new PlinkoRock(rock));
+	std::cout << "가격 : " << rock.Price << ", Num : " << rock.Num << std::endl;
+}
 
 void PlinkoRock::cntRock() {
 	// 운석 전체 갯수
@@ -79,63 +86,104 @@ void plinkoInit(HWND hWnd) {	// 초기화
 	goalBox[3] = { (plinkoBox.right / 4) * 3, plinkoBox.right };
 
 	// 핀 좌표 설정
-	// **어긋나는 부분 수정할 예정**
 	int width = plinkoBox.right;
 	int height = GOAL_LINE - 100;
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 5; j++) {
+
+	// 핀 설치 영역
+	int left = plinkoBox.left + 50;
+	int right = plinkoBox.right - 100;
+	int top = plinkoBox.top + 200;
+	int bottom = GOAL_LINE - 100;
+
+	// 핀들 간의 간격
+	int xGap = (right - left) / PIN_ROWS;
+	int yGap = (bottom - top) / PIN_COLS;
+
+	int pinCount;
+	int centerX = plinkoBox.right / 2;
+	for (int row = 0; row < 7; row++)
+	{
+		if (row % 2 == 0) {
+			pinCount = 7;
+		}
+		else {
+			pinCount = 6;
+		}
+		int startX = centerX - ((pinCount - 1) * xGap) / 2;
+
+		int y = top + row * yGap;
+
+		for (int col = 0; col < pinCount; col++)
+		{
 			pin p;
-			int xGap = width / 6;
-			int x = xGap * (j+1);
-			if (i % 2 == 0) {
-				x += xGap / 2;
-			}
-			
-			int y = height / 10;
+
+			int x = startX + col * xGap;
 
 			p.x1 = x - 5;
 			p.x2 = x + 5;
-			p.y1 = y * (i + 1) - 5;
-			p.y2 = y * (i + 1) + 5;
+			p.y1 = y - 5;
+			p.y2 = y + 5;
+
 			pinPos.push_back(p);
 		}
 	}
 }
 
-int PlinkoRock::checkGoal() {
-	if (GOAL_LINE <= m_y && goalBox[0].x1 <= m_x && m_x <= goalBox[0].x2) {
-		addPrice = m_rock[rockNum].Price;
-		addPrice = addPrice* zonePrice[0];
+// 플랑코 돈 적립 구간 함수
+// 돈 계산 입력 예정
+void checkGoal() {
+	for (auto it = rocks.begin(); it != rocks.end(); ) {
 
-		userCash = sumPrice(userCash, addPrice);
-		return 1;
-	}
-	else if (GOAL_LINE <= m_y && goalBox[1].x1 <= m_x && m_x <= goalBox[1].x2) {
-		addPrice = m_rock[rockNum].Price;
-		addPrice = addPrice * zonePrice[1];
+		PlinkoRock* rock = *it;
 
-		userCash = sumPrice(userCash, addPrice);
-		return 2;
-	}
-	else if (GOAL_LINE <= m_y && goalBox[2].x1 <= m_x && m_x <= goalBox[2].x2) {
-		addPrice = m_rock[rockNum].Price;
-		addPrice = addPrice * zonePrice[2];
+		if (rock->GetY() >= GOAL_LINE) {
 
-		userCash = sumPrice(userCash, addPrice);
-		return 3;
-	}
-	else if (GOAL_LINE <= m_y && goalBox[3].x1 <= m_x && m_x <= goalBox[3].x2) {
-		addPrice = m_rock[rockNum].Price;
-		addPrice = addPrice * zonePrice[3];
+			if (goalBox[0].x1 <= rock->GetX() && rock->GetX() <= goalBox[0].x2) {
+				std::cout << "BOX 1" << std::endl;
+				/*addPrice = m_rock[rockNum].Price;
+				addPrice = addPrice * zonePrice[0];
 
-		userCash = sumPrice(userCash, addPrice);
-		return 4;
+				userCash = sumPrice(userCash, addPrice);*/
+			}
+			else if (goalBox[1].x1 <= rock->GetX() && rock->GetX() <= goalBox[1].x2) {
+				std::cout << "BOX 2" << std::endl;
+				/*addPrice = m_rock[rockNum].Price;
+				addPrice = addPrice * zonePrice[1];
+
+				userCash = sumPrice(userCash, addPrice);*/
+			}
+			else if (goalBox[2].x1 <= rock->GetX() && rock->GetX() <= goalBox[2].x2) {
+				std::cout << "BOX 3" << std::endl;
+				/*addPrice = m_rock[rockNum].Price;
+				addPrice = addPrice * zonePrice[2];
+
+				userCash = sumPrice(userCash, addPrice);*/
+			}
+			else if (goalBox[3].x1 <= rock->GetX() && rock->GetX() <= goalBox[3].x2) {
+				std::cout << "BOX 4" << std::endl;
+				/*addPrice = m_rock[rockNum].Price;
+				addPrice = addPrice * zonePrice[3];
+
+				userCash = sumPrice(userCash, addPrice);*/
+			}
+			/*
+			돈 계산
+			*/
+
+			delete rock;
+			it = rocks.erase(it);
+
+		}
+		else {
+			++it;
+		}
+		
 	}
-	return 0;
 }
 
-bool plinkoCollisionCheck() {
-	
+// rock - rock 충돌 처리
+bool rockCollisionCheck() {
+
 	// 핀과 운석, 운석과 운석 충돌 처리
 	for (auto& p : pinPos) {
 		/*if (plinkoRock.m_x) {
@@ -144,7 +192,18 @@ bool plinkoCollisionCheck() {
 		return TRUE;
 	}
 	return FALSE;
+}
 
+// rock - pin 충돌 처리
+bool pinCollisionCheck() {
+	// 핀과 운석, 운석과 운석 충돌 처리
+	for (auto& p : pinPos) {
+		/*if (plinkoRock.m_x) {
+
+		}*/
+		return TRUE;
+	}
+	return FALSE;
 }
 
 void plinkoDraw(HDC hDC) {
@@ -158,10 +217,26 @@ void plinkoDraw(HDC hDC) {
 	}
 	
 	// 튕기는 핀 그리기
-	for (auto& p : pinPos)
-	{
+	for (auto& p : pinPos) {
 		Ellipse(hDC, p.x1, p.y1, p.x2, p.y2);
 	}
-
 }
 
+void rocksDraw(HDC hDC) {
+	for (auto rock : rocks) {
+		Ellipse(hDC, (int)rock->GetX(), (int)rock->GetY(), (int)rock->GetX() + ROCK_SIZE, (int)rock->GetY() + ROCK_SIZE);
+	}
+}
+
+void rockUpdate() {
+	for (auto rock : rocks)
+	{
+		rock->Move(0, 5);
+	}
+}
+
+void pTimerCheck(HWND hWnd) {
+	if (rocks.empty()) {
+		KillTimer(hWnd, 4);
+	}
+}

@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "Rock.h"
 #include <Windows.h>
 #include <vector>
@@ -12,18 +10,26 @@ extern int plinkoRockSum;	// 운석 남은 갯수 확인
 // 플랑코 시스템 클래스
 class PlinkoRock : public GameObject
 {
-private:
-	std::vector<MinRock> P_rock;
 public:
-	PlinkoRock();
+	PlinkoRock(const MinRock& rock);
 	~PlinkoRock();
 
 	int p_price;
 
 	void cntRock();
 	int sumPrice(int totalPriceint, int addPrice);
-	int checkGoal();
+	
+
+
 };
+void checkGoal();
 
 void plinkoDraw(HDC hDC);
+
 void plinkoInit(HWND hWnd);
+void plinkoSpawn(const MinRock& rock);	// 벡터에 rock 넣기
+
+void rocksDraw(HDC hDC);
+void rockUpdate();
+
+void pTimerCheck(HWND hWnd);
