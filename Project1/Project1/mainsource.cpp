@@ -76,6 +76,8 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
 void GameOver(HWND hWnd, int& WindSinec);
 
+void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
+
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
@@ -89,6 +91,7 @@ void GameOver(HWND hWnd, int& WindSinec);
 Player player;
 Rock rock[MAX_ROCKS];
 Bullet bullet[MAX_BULLETS];
+GameMap gMap;
 
 // 현재 마우스 커서의 위치
 int xPos{};
@@ -487,85 +490,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		// 전투 화면
 		else if (window_scene == 2) {
-			// 돌
-			{
-				HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
-				HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
-				for (int i = 0; i < MAX_ROCKS; ++i) {
-					if (rock[i].GetActive()) {
-						int rx = rock[i].GetX();
-						int ry = rock[i].GetY();
-						int rs = rock[i].GetSize();
-						Rectangle(mDC, rx - rs, ry - rs, rx + rs, ry + rs);
-					}
-				}
-				DeleteObject(rBRUSH);
-			}
-
-			// 아이템 박스
-			{
-				
-			}
-
-			// 플레이어
-			{
-				HBRUSH pBRUSH = CreateSolidBrush(RGB(255,255, 255));
-				HBRUSH oldpBRUSH = (HBRUSH)SelectObject(mDC, pBRUSH);
-				int px = player.GetX();
-				int py = player.GetY();
-				int pS = player.GetSize();
-				Rectangle(mDC, px - pS, py - pS, px + pS, py + pS);
-				DeleteObject(pBRUSH);
-
-			}
-
-			// 총알
-			{
-				HBRUSH bBrush = CreateSolidBrush(RGB(0, 255, 0));
-				HBRUSH oldbBrush = (HBRUSH)SelectObject(mDC, bBrush);
-
-				for (int i = 0; i < MAX_BULLETS; ++i) {
-					if (bullet[i].GetIsActive()) {
-						int bx = bullet[i].GetX();
-						int by = bullet[i].GetY();
-						int bs = bullet[i].GetSize();
-						Ellipse(mDC, bx - bs, by - bs, bx + bs, by + bs);
-					}
-				}
-				DeleteObject(bBrush);
-			}
-
-			// 연료바
-			{
-				// 플레이어의 현재 연료 수치
-				double pF = player.GetFual();
-
-				// 플레이어의 최대 연료 수치
-				double pMF = player.GetMaxFual();
-
-				// 현재 비율
-				double FualRate = pF / pMF;
-
-				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
-				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
-
-				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
-				//current_hp max_hp <- 임의로 지어둔 이름
-				//Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (float)(max_hp-current_hp)*400, rectView.top + 45);
-				Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (FualRate) * 400, rectView.top + 45);
-
-				oldFont = (HFONT)SelectObject(mDC, hFont);
-				SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
-
-				std::cout << FualRate << '\n';
-
-				wchar_t str[64];
-				// 플레이어 현재 체력 / 최대 체력 (연료)
-				//current_hp max_hp <- 임의로 지어둔 이름
-				//wsprintf(str, L"%d / %d", current_hp, max_hp);
-				wsprintf(str, L"%d / %d", player.GetFual(), player.GetMaxFual());
-				TextOut(mDC, rectView.left + 165, rectView.top + 15, str, lstrlen(str));
-			}
+			
+			Draw(mDC, hWnd, rectView, hBrush, hFont);
 
 			// 강제 사망 (임시)
 			{
@@ -753,6 +679,8 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 
 		player.Spawn();
 
+		gMap.SetRockNum();
+
 		isGaming = true;
 
 		for (int i = 0; i < MAX_ROCKS; ++i) {
@@ -778,4 +706,27 @@ void GameOver(HWND hWnd, int& WinSince)
 	WinSince = 1;
 
 	isGaming = false;
+}
+
+void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
+{
+	// 총알 Draw
+	for (int i = 0; i < MAX_BULLETS; ++i) {
+		if (bullet[i].GetIsActive()) {
+			bullet[i].Draw(mDC);
+		}
+	}
+
+	// 운석 Draw
+	for (int i = 0; i < MAX_ROCKS; ++i) {
+		if (rock[i].GetActive()) {
+			rock[i].Draw(mDC);
+		}
+	}
+
+	// Player
+	player.Draw(mDC, rectView, hBrush, hFont);
+
+	// 스테이지 그리기
+	gMap.Draw(mDC, rectView, hBrush, hFont);
 }

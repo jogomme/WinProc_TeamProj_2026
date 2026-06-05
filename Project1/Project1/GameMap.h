@@ -29,10 +29,14 @@ public:
 	int GetStage() const;
 	int GetTickRate() const;
 
+	// Set 함수
 	void SetStage(int stage);
+	void SetRockNum();
 
 	// 다음 스테이지로 넘어가는 함수
 	void NextStage(); 
+
+	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 
 protected :
 
@@ -40,13 +44,13 @@ protected :
 	// 0번 index 가 가장 낮은 가치를 지님
 	MinRock m_rock[3];
 
-	int m_stage;
+	static int m_stage;
 
 	// 스테이지 올라가기까지 필요한 암석의 갯수
 	int m_goal;
 
 	// 이번 스테이지에 파괴된 암석의 갯수
-	int m_rockNum;
+	static int m_rockNum;
 
 	// 게임의 진행 속도를 조절하는 변수
 	int TickRate; 

@@ -45,6 +45,9 @@ public :
 	// 충돌 체크 함수
 	void Crash(Rock& r);
 
+	// 그리기 함수
+	void Draw(HDC mDC);
+
 	
 private :
 	// 방향 벡터

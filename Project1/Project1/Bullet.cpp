@@ -52,6 +52,17 @@ void Bullet::Move(double xPos, double yPos)
 	CheckBoundary(xPos, yPos);
 }
 
+// 그리기 함수
+void Bullet::Draw(HDC mDC)
+{
+	HBRUSH bBrush = CreateSolidBrush(RGB(0, 255, 0));
+	HBRUSH oldbBrush = (HBRUSH)SelectObject(mDC, bBrush);
+
+	Ellipse(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+	
+	DeleteObject(bBrush);
+}
+
 double Bullet::GetLength(const Rock& r)
 {
 	int rx = r.GetX();
