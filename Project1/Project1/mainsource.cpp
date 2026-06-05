@@ -301,6 +301,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
 					enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
 					enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
+
+					double amount = enforce[i].Get_Enforce_Amount();
+					//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
+					if (enforce[i].Get_Enforce_Type() == 1) {
+						player.SetAttackPower(amount);
+					}
+					else if (enforce[i].Get_Enforce_Type() == 2) {
+						player.SetSpeed(amount);
+					}
+					else if (enforce[i].Get_Enforce_Type() == 3) {
+						player.SetFual(amount);
+					}
+					else if (enforce[i].Get_Enforce_Type() == 4) {
+						player.SetAttackSpeed(amount);
+					}
 				}
 			}
 
