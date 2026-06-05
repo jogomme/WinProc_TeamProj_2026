@@ -3,6 +3,7 @@
 
 int GameMap::m_rockNum = 0;
 int GameMap::m_stage = 1;
+MinRock GameMap::m_rock[3] = {};
 
 GameMap::GameMap()
 	: TickRate(16) // 60 프레임으로 설정

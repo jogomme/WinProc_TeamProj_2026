@@ -45,7 +45,7 @@ protected :
 
 	// 부숴진 암석의 종류와 갯수를 저장하는 배열
 	// 0번 index 가 가장 낮은 가치를 지님
-	MinRock m_rock[3];
+	static MinRock m_rock[3];
 
 	// 현제 스테이지
 	static int m_stage;

@@ -16,6 +16,7 @@ Player::Player()
 	attackType = 0;
 	m_size = 20;
 	m_MaxFual = 100;
+	SearchBox = 20;
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{
 		m_length[i] = INF;
@@ -23,8 +24,8 @@ Player::Player()
 
 	//2026,05,31
 	// 1초에 1발은 쏜다는 것을 목표로 설정
-	//m_AttackSpeed = 1000; // 현재 공격속도 <- 공격 타입 등에서 변환하여 사용 할 수 있음
-	m_AttackSpeed_Spawn = 1000; // 강화 등을 통한 공격속도 <- 소환 되면 항시 이 속도로 시작 함
+	m_AttackSpeed_type_0 = 1000;
+	m_AttackSpeed_type_1 = 500;
 }	
 
 Player::~Player()
@@ -56,7 +57,12 @@ void Player::SetLength(const Rock& r)
 // Getter
 int Player::GetAttackSpeed()
 {
-	return m_AttackSpeed;
+	return m_AttackSpeed_type_0;
+}
+
+double Player::GetSearchBox() const
+{
+	return SearchBox;
 }
 
 // 최소거리에 있는 암석의 ID 반환 함수
@@ -99,8 +105,6 @@ void Player::Spawn()
 	{
 		m_length[i] = INF;
 	}
-
-	m_AttackSpeed = m_AttackSpeed_Spawn; // 2026.06.05
 }
 
 void Player::attack(Rock& r)
@@ -126,7 +130,7 @@ void Player::attack(Rock& r)
 		}
 	}
 	else if (attackType == 1) {
-		NULL;
+		m_AttackSpeed = m_AttackSpeed_type_1;
 	}
 }
 
@@ -208,6 +212,11 @@ void Player::SetAttackType(int type)
 	attackType = type;
 }
 
+void Player::SetSearchBox(double deg)
+{
+	SearchBox += deg;
+}
+
 // 연료 증가 함수
 // 2026.06.05 최대 연료를 증가하도록 수정.
 void Player::SetFual(double deg)
@@ -229,5 +238,6 @@ void Player::SetAttackPower(double deg)
 
 void Player::SetAttackSpeed(double deg)
 {
-	m_AttackSpeed_Spawn -= deg;
+	m_AttackSpeed_type_0 -= deg;
+	m_AttackSpeed_type_1 -= deg * 2;
 }

@@ -16,6 +16,8 @@
 #include "Plinko.h"
 #include "Enforce.h"
 
+#include "Feed.h"
+
 // 2026,05,31
 #include "Bullet.h"
 
@@ -88,12 +90,14 @@ void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 #define MAX_ROCKS 50
 #define MAX_BULLETS 150
 #define MAX_ENFORCE 500
+#define MAX_FEED 150
 
 Player player;
 Rock rock[MAX_ROCKS];
 Bullet bullet[MAX_BULLETS];
 GameMap gMap;
 Enforce enforce[MAX_ENFORCE];
+Feed feed[MAX_FEED];
 
 // 현재 마우스 커서의 위치
 int xPos{};
@@ -630,6 +634,13 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 			}
 		}
+
+		for (int i = 0; i < MAX_FEED; ++i) {
+			if (feed[i].GetActive()) {
+				feed[i].Move(width, height);
+				feed[i].SetLength(player);
+			}
+		}
 	}
 	//--------------------------------------------------------------------
 	//  공격 관련 타이머
@@ -732,4 +743,10 @@ void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 
 	// 스테이지 그리기
 	gMap.Draw(mDC, rectView, hBrush, hFont);
+
+	for (int i = 0; i < MAX_FEED; ++i) {
+		if (feed[i].GetActive()) {
+			feed[i].Draw(mDC);
+		}
+	}
 }

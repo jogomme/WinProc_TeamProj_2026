@@ -24,7 +24,6 @@ public:
 
 	void SetLength(const Rock& r); // 플레이어와 암석사이의 거리 계산 함수
 
-
 	// Getter
 	int GetMinLengthID(); // 최소거리에 있는 암석의 ID 반환 함수
 
@@ -32,6 +31,8 @@ public:
 
 	int GetMaxFual();
 	int GetFual();
+
+	double GetSearchBox() const;
 
 	//최소 거리에 있는 암석의 위치 반환 함수
 	Point GetMinLengthRock();
@@ -44,6 +45,7 @@ public:
 	void SetSpeed(double deg); // 속도 설정 함수
 	void SetAttackPower(double deg); // 공격력 설정 함수
 	void SetAttackSpeed(double deg);
+	void SetSearchBox(double deg);
 
 	void Spawn();
 
@@ -56,15 +58,21 @@ public:
 	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 
 private:
-	int attackType; // 공격 종류
-	double m_fual; // 연료
-	double m_MaxFual;
+	// 0 - 기본 무기, 1 - 체인건
+	int attackType;
+
+	double m_fual;		// 현재 연료
+	double m_MaxFual;	// 최대 연료
 
 	int max_hp;
 
+	// Feed의 탐색범위 강화하면 늘어난다(반지름 기준) - 기본은 Size와 동일하다
+	double SearchBox;
+
 	// 공격하는 텀 - 2026, 05, 31
-	int m_AttackSpeed; // 현재 공격 속도
-	int m_AttackSpeed_Spawn; // 2026.06.05 기본 공격 속도
+	int m_AttackSpeed;			// 현재 공격 속도
+	int m_AttackSpeed_type_0;	// 기본 공격 속도
+	int m_AttackSpeed_type_1;	// 체인건 공격 속도
 
 	double m_length[MAX_ROCKS]; // 플레이어와 암석 사이의 거리
 };

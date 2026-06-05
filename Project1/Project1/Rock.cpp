@@ -4,7 +4,11 @@
 #include "GameMap.h"
 #include <time.h>
 #include<random>
+
 #include"Feed.h"
+
+extern Feed feed[];
+#define MAX_FEEDS 150
 
 #define width 1280
 #define height 800
@@ -112,14 +116,33 @@ void Rock::setDirection(int X, int Y)
 
 }
 
+void Rock::Die()
+{
+	isActive = false;
+	GameMap::m_rockNum++;
+
+	int feedCount = (rand() % 3) + (GetStage() / 2) + 1;
+
+	for (int f = 0; f < feedCount; f++) {
+		for (int k = 0; k < MAX_FEEDS; k++) {
+			if (!feed[k].GetActive()) {
+				feed[k].Drop(*this);
+				break;
+			}
+		}
+	}
+
+	Spawn();
+}
+
 // 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 void Rock::Move(double x, double y)
 {
 	if (m_hp <= 0 && isActive) {
-		isActive = false;
-		GameMap::m_rockNum++;
-		Spawn();
+		Die();
 	}
+
+	if (!isActive) return;
 
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 	m_x += direction[0] * m_speed;
