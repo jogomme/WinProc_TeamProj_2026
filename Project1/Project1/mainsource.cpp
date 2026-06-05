@@ -74,7 +74,7 @@ std::uniform_int_distribution<int> uid(0, 255);
 int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv);
 void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
-void GameOver(HWND hWnd, int& WindSinec);
+void GameOver(HWND hWnd);
 
 void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 
@@ -312,9 +312,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 강제 사망 (임시)
 			if ((mx > rectView.left + 5 && mx < rectView.left + 35 &&
 				my > rectView.top + 50 && my < rectView.top + 80)) {
-				GameOver(hWnd, window_scene);
+				GameOver(hWnd);
 			}
-
+			if (isGaming == false) {
+				if ((mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
+					my > rectViewMid.y - 30 && my < rectViewMid.y + 30)) {
+					window_scene = 1;
+				}
+			}
 		}
 		// 설정 화면
 		else if (window_scene == 3) {
@@ -482,6 +487,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				wsprintf(str, L"Death");
 				TextOut(mDC, rectView.left + 5, rectView.top + 50, str, lstrlen(str));
 			}
+			// 사망시 게임 오버 버튼
+			{
+				if (isGaming == false) {
+					oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
+					Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 30, rectViewMid.x + 100, rectViewMid.y + 30);
+
+					oldFont = (HFONT)SelectObject(mDC, hFont);
+					SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+					wchar_t str[64];
+					wsprintf(str, L"Game Over");
+					TextOut(mDC, rectViewMid.x - 60, rectViewMid.y - 60, str, lstrlen(str));
+
+					wsprintf(str, L"Go Enforce Page");
+					TextOut(mDC, rectViewMid.x - 80, rectViewMid.y - 10, str, lstrlen(str));
+				}
+			}
 		}
 		// 설정 화면
 		else if (window_scene == 3) {
@@ -586,7 +607,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	//--------------------------------------------------------------------
 	if (idEvent == GoMove) {
 		if (player.GetHP() <= 0) {
-			GameOver(hWnd, window_scene);
+			GameOver(hWnd);
 			return;
 		}
 
@@ -681,13 +702,11 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 	}
 }
 
-void GameOver(HWND hWnd, int& WinSince)
+void GameOver(HWND hWnd)
 {
 	KillTimer(hWnd, GoMove);
 	KillTimer(hWnd, GoAttack);
 	KillTimer(hWnd, GoConsumeFual);
-
-	WinSince = 1;
 
 	isGaming = false;
 }
