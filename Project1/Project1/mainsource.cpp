@@ -190,22 +190,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		{
 			enforce_size = 20;
 			enforce_intrv = 80;
-			
-			//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
-			enforce[0].Set_Pos(0, 0);
-			enforce[0].Set_TAP(1, 1, 1);
-			enforce[0].Set_Draw(1);
-			enforce[0].Set_Drawing(1, 2, 3);
-
-			enforce[1].Set_Pos(1, 0);
-			enforce[1].Set_TAP(2, 1, 1);
-			enforce[1].Set_Drawing(-1, -1, -1);
-
-			enforce[2].Set_Pos(-1, 0);
-			enforce[2].Set_TAP(3, 1, 1);
-			enforce[2].Set_Drawing(-1, -1, -1);
 
 			for (int i = 0; i < MAX_ENFORCE; i++) {
+				enforce[i].Start_Setting(enforce[i], i);
 				enforce[i].Move_Mid_Pos(rectViewMid, enforce_intrv);
 			}
 		}

@@ -31,6 +31,8 @@ public:
 	void Set_Drawing(int, int, int); // 강화시 그릴 버튼 지정 함수 최대 3개
 	void Set_Open(int); // open 지정
 
+	void Start_Setting(Enforce&, int); // 위 함수들을 실행하는 함수
+
 protected:
 	double x, y; // 버튼의 위치 배율 (최초 노드는 0,0)
 	int type; // 강화 할 타입

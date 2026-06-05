@@ -87,3 +87,26 @@ void Enforce::Set_Open(int a)
 {
 	open = a;
 }
+
+void Enforce::Start_Setting(Enforce& ef, int cnt)
+{
+	//TAP / t-type, a-amount, p-price
+	//type 1-공격, 2-이동속도, 3-연료, 4-공격속도, 5-공격타입 해금
+	//amount.공격타입 1-공속업, 2-다중발사, 3-총알 크기 증가
+	if (cnt == 0) {
+		ef.Set_Pos(0, 0);
+		ef.Set_TAP(1, 1, 1);
+		ef.Set_Draw(1);
+		ef.Set_Drawing(1, 2, 3);
+	}
+	else if (cnt == 1) {
+		ef.Set_Pos(1, 0);
+		ef.Set_TAP(2, 1, 1);
+		ef.Set_Drawing(-1, -1, -1);
+	}
+	else if (cnt == 2) {
+		ef.Set_Pos(-1, 0);
+		ef.Set_TAP(3, 1, 1);
+		ef.Set_Drawing(-1, -1, -1);
+	}
+}
