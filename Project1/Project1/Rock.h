@@ -31,6 +31,9 @@ public:
 	// 이동 함수
 	void Move(double x, double y) override; // 완
 
+	// 그리기 함수
+	void Draw(HDC mDC);
+
 	// 암석 해금 함수
 	void UnlockRockType(int rockType); // 완
 

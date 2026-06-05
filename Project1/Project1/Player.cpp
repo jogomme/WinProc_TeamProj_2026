@@ -158,6 +158,38 @@ void Player::Move(double targetX, double targetY)
 	m_y += dirY * m_speed;
 }
 
+void Player::Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont)
+{
+	// Player의 본체 그리기 ( 실제 움직이는 것 )
+	HBRUSH pBRUSH = CreateSolidBrush(RGB(255, 255, 255));
+	HBRUSH oldpBRUSH = (HBRUSH)SelectObject(mDC, pBRUSH);
+	
+	Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+	DeleteObject(pBRUSH);
+
+
+	// 연료바 그리기
+	// 현재 비율
+	double FualRate = m_fual / m_MaxFual;
+
+	HBRUSH oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
+	Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
+
+	oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
+	Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (FualRate) * 400, rectView.top + 45);
+
+	HFONT oldFont = (HFONT)SelectObject(mDC, hFont);
+	SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+
+	wchar_t str[64];
+
+	int f = m_fual;
+	int mf = m_MaxFual;
+	wsprintf(str, L"%d / %d",f, mf);
+	TextOut(mDC, rectView.left + 165, rectView.top + 15, str, lstrlen(str));
+}
+
 void Player::ConsumeFual()
 {
 	int stage = GameMap::GetStage();
@@ -168,6 +200,8 @@ void Player::ConsumeFual()
 	}
 }
 
+
+// Set 함수
 // 공격 종류 설정 함수
 void Player::SetAttackType(int type) 
 {

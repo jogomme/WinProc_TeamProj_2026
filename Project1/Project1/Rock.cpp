@@ -115,8 +115,10 @@ void Rock::setDirection(int X, int Y)
 // 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 void Rock::Move(double x, double y)
 {
-	if (m_hp <= 0) {
+	if (m_hp <= 0 && isActive) {
 		isActive = false;
+		GameMap::m_rockNum++;
+		Spawn();
 	}
 
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
@@ -124,6 +126,16 @@ void Rock::Move(double x, double y)
 	m_y += direction[1] * m_speed;
 
 	CheckBoundary(x, y);
+}
+
+// 그리기 함수
+void Rock::Draw(HDC mDC)
+{
+	HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
+	HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
+	
+	Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+	DeleteObject(rBRUSH);
 }
 
 void Rock::UnlockRockType(int rockType)

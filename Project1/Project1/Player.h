@@ -53,6 +53,7 @@ public:
 	// 연로 감소 함수 - 스테이지에 비례해 연료 감소량이 증가함
 	void ConsumeFual();
 
+	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 
 private:
 	int attackType; // 공격 종류

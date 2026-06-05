@@ -8,5 +8,4 @@ public :
 	void drop(const Rock& r);
 private:
 	double m_price;
-
 };
