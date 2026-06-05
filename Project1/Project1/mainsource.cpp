@@ -105,7 +105,7 @@ const int GoAttack{ 2 };
 const int GoConsumeFual{ 3 };
 const int GoShow{ -1 };
 
-// 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창
+// 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
 int window_scene{0};
 
 //-----------------------------------------------------------------------------------------------
@@ -267,9 +267,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
+			// 플링코 진입 버튼
+			else if (mx > rectView.left + 5 && mx < rectView.left + 105 &&
+				my > rectView.top + 5 && my < rectView.top + 45) {
+				window_scene = 4;
+				break;
+			}
+
+			// 강화 진입 버튼
+			else if (mx > rectView.left + 115 && mx < rectView.left + 215 &&
+				my > rectView.top + 5 && my < rectView.top + 45) {
+				window_scene = 1;
+				break;
+			}
+
 			// 세팅 진입 버튼
-			else if (mx > rectView.left + 225 && mx < rectView.left + 430 &&
-				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
+			else if (mx > rectView.left + 225 && mx < rectView.left + 325 &&
+				my > rectView.top + 5 && my < rectView.top + 45) {
 				return_setting = window_scene;
 				window_scene = 3;
 				break;
@@ -310,6 +324,60 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
 				my > rectViewMid.y + 80 && my < rectViewMid.y + 120) {
 				window_scene = return_setting;
+			}
+		}
+		// 플링코 화면
+		else if (window_scene == 4) {
+
+			// 전투 진입 버튼 클릭
+			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
+				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
+				GameStart(hWnd, rectView, mx, my, window_scene);
+				window_scene = 2;
+				break;
+			}
+
+			// 플링코 진입 버튼
+			else if (mx > rectView.left + 5 && mx < rectView.left + 105 &&
+				my > rectView.top + 5 && my < rectView.top + 45) {
+				window_scene = 4;
+				break;
+			}
+
+			// 강화 진입 버튼
+			else if (mx > rectView.left + 115 && mx < rectView.left + 215 &&
+				my > rectView.top + 5 && my < rectView.top + 45) {
+				window_scene = 1;
+				break;
+			}
+
+			// 세팅 진입 버튼
+			else if (mx > rectView.left + 225 && mx < rectView.left + 325 &&
+				my > rectView.top + 5 && my < rectView.top + 45) {
+				return_setting = window_scene;
+				window_scene = 3;
+				break;
+			}
+
+			// 강화 버튼 클릭
+			int ck = 0;
+			for (int i = 0; i < enforce_cnt; i++) {
+				if (mx > enforce[i].x - enforce_size && mx < enforce[i].x + enforce_size &&
+					my > enforce[i].y - enforce_size && my < enforce[i].y + enforce_size &&
+					enforce[i].draw == 1 && enforce[i].type != 0) {
+					ck = 1;
+					enforce[i].open = 1;
+					enforce[i * 3 + 1].draw = 1;
+					enforce[i * 3 + 2].draw = 1;
+					enforce[i * 3 + 3].draw = 1;
+				}
+			}
+
+			// 빈 공간 클릭
+			if (ck == 0 && window_scene == 1) {
+				drag = 1;
+				drag_start.x = mx;
+				drag_start.y = my;
 			}
 		}
 
@@ -395,15 +463,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			wsprintf(str, L"Go Fight"); // 추후 이미지 버튼 등으로 변경 예정
 			TextOut(mDC, rectView.left + 65, rectView.bottom - 55, str, lstrlen(str));
 
-			// 강화 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
-			Rectangle(mDC, rectView.left + 225, rectView.bottom - 85, rectView.left + 430, rectView.bottom - 5);
+			// 플링코 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[6]);
+			Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 105, rectView.top +45);
 
-			oldFont = (HFONT)SelectObject(mDC, hFont);
-			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+			wsprintf(str, L"Plinko"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 25, rectView.top + 15, str, lstrlen(str));
+
+			// 강화 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
+			Rectangle(mDC, rectView.left + 115, rectView.top + 5, rectView.left + 215, rectView.top + 45);
+
+			wsprintf(str, L"Enforce"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 135, rectView.top + 15, str, lstrlen(str));
+
+			// 설정 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
+			Rectangle(mDC, rectView.left + 225, rectView.top + 5, rectView.left + 325, rectView.top + 45);
 
 			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 285, rectView.bottom - 55, str, lstrlen(str));
+			TextOut(mDC, rectView.left + 245, rectView.top + 15, str, lstrlen(str));
 		}
 		// 전투 화면
 		else if (window_scene == 2) {
@@ -499,7 +578,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				TextOut(mDC, rectView.left + 5, rectView.top + 50, str, lstrlen(str));
 			}
 		}
-
+		// 설정 화면
 		else if (window_scene == 3) {
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
 			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 80, rectViewMid.x + 100, rectViewMid.y + 120);
@@ -510,6 +589,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			wchar_t str[64];
 			wsprintf(str, L"Go Back"); // 추후 이미지 버튼 등으로 변경 예정
 			TextOut(mDC, rectViewMid.x - 50, rectViewMid.y + 90, str, lstrlen(str));
+		}
+
+		else if (window_scene == 4) {
+			plinkoInit(hWnd);
+			plinkoDraw(mDC);
+
+			oldFont = (HFONT)SelectObject(mDC, hFont);
+			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+
+			wchar_t str[64];
+			// 플링코 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[6]);
+			Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 105, rectView.top + 45);
+
+			wsprintf(str, L"Plinko"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 25, rectView.top + 15, str, lstrlen(str));
+
+			// 강화 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
+			Rectangle(mDC, rectView.left + 115, rectView.top + 5, rectView.left + 215, rectView.top + 45);
+
+			wsprintf(str, L"Enforce"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 135, rectView.top + 15, str, lstrlen(str));
+
+			// 설정 화면 진입 버튼
+			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
+			Rectangle(mDC, rectView.left + 225, rectView.top + 5, rectView.left + 325, rectView.top + 45);
+
+			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
+			TextOut(mDC, rectView.left + 245, rectView.top + 15, str, lstrlen(str));
 		}
 
 		SelectObject(mDC, oldBrush);
