@@ -1,4 +1,4 @@
-#include<Windows.h>
+﻿#include<Windows.h>
 #include<windowsx.h>
 #include<time.h>
 #include<iostream>
@@ -82,7 +82,7 @@ void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
 
-// 콘솔 창 띄우는 용도입니다. Debug 용도입니다.
+// 콘솔 창 띄우는 용도입니다. Debug(디버그) 용도입니다.
 //#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 #define MAX_ROCKS 50
@@ -99,6 +99,12 @@ int yPos{};
 
 // 현재 최대 총알 갯수
 int BulletCnt{};
+
+// 스테이지 넘어가기 까지 눌러야하는 스페이스바 꾹 수
+const int isSpaceBarDown = 85;
+
+// 지금 얼마나 눌렀는지
+int isDowning = 0;
 
 // 게임 상태 변수
 bool isGaming = false;
@@ -238,10 +244,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(0);
 			return 0;
 		}
+		else if (wParam == VK_SPACE) {
+			if (gMap.isfull()) {
+				isDowning++;
+				if (isDowning >= isSpaceBarDown) {
+					gMap.NextStage();
+				}
+			}
+		}
 
 		InvalidateRect(hWnd, NULL, false);
 		break;
-
+	case WM_KEYUP: {
+		if (wParam == VK_SPACE) {
+			isDowning = 0;
+		}
+	}
 	case WM_LBUTTONDOWN:
 		mx = LOWORD(lParam);
 		my = HIWORD(lParam);
@@ -604,7 +622,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	GetClientRect(hWnd, &rect);
 
 	//--------------------------------------------------------------------
-	//  이동 관련 타이머
+	//  이동 및 재생성 관련 타이머
 	//--------------------------------------------------------------------
 	if (idEvent == GoMove) {
 		if (player.GetHP() <= 0) {
@@ -614,7 +632,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 		player.Move(xPos, yPos);
 
-		for (int i = 0; i < MAX_ROCKS; ++i) {
+		for (int i = 0; i < gMap.GetMaximumRock(); ++i) {
 			player.SetLength(rock[i]);
 
 			rock[i].Move(width, height);
@@ -675,15 +693,21 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 	if (!isGaming) {
 		window_scene = 2;
 
+		// 스테이지 초기화
+		gMap.SetStage(1);
+
+		// 화면 중앙 고정
 		SetCursorPos(width / 2, height / 2);
 
+		// 플레이어 태어남
 		player.Spawn();
 
+		// 다음 스테이지로 가는데 필요한 돌 계수 초기화
 		gMap.SetRockNum();
 
 		isGaming = true;
 
-		for (int i = 0; i < MAX_ROCKS; ++i) {
+		for (int i = 0; i < gMap.GetMaximumRock(); ++i) {
 			rock[i].Spawn();
 		}
 

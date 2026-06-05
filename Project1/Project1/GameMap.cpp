@@ -7,7 +7,8 @@ int GameMap::m_stage = 1;
 GameMap::GameMap()
 	: TickRate(16) // 60 프레임으로 설정
 {
-	m_goal = 100;
+	m_goal = 50;
+	MaximumRock = 10;
 }
 
 GameMap::~GameMap()
@@ -25,18 +26,34 @@ int GameMap::GetTickRate() const
 	return TickRate;
 }
 
+int GameMap::GetMaximumRock() const
+{
+	return MaximumRock;
+}
+
+bool GameMap::isfull() const
+{
+	return m_rockNum >= m_goal;
+}
+
 void GameMap::SetStage(int stage)
 {
+	if (stage <= 0) {
+		m_stage = 1;
+		return;
+	}
 	m_stage = stage;
+}
+
+void GameMap::SetMaximumRock(int PlusNum)
+{
+	MaximumRock += PlusNum;
 }
 
 void GameMap::NextStage()
 {
-	if (m_goal <= m_rockNum)
-	{
-		m_stage++;
-		m_rockNum = 0;
-	}
+	m_stage++;
+	SetRockNum();
 }
 
 void GameMap::SetRockNum()

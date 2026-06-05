@@ -181,7 +181,6 @@ void Player::Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	HFONT oldFont = (HFONT)SelectObject(mDC, hFont);
 	SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 
-	std::cout << FualRate << '\n';
 
 	wchar_t str[64];
 

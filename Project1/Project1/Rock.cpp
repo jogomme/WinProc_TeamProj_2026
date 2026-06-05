@@ -118,6 +118,7 @@ void Rock::Move(double x, double y)
 	if (m_hp <= 0 && isActive) {
 		isActive = false;
 		GameMap::m_rockNum++;
+		Spawn();
 	}
 
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.

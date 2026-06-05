@@ -28,10 +28,13 @@ public:
 	// Getter 함수
 	int GetStage() const;
 	int GetTickRate() const;
+	int GetMaximumRock() const;
+	bool isfull() const;
 
 	// Set 함수
 	void SetStage(int stage);
 	void SetRockNum();
+	void SetMaximumRock(int plusNum);
 
 	// 다음 스테이지로 넘어가는 함수
 	void NextStage(); 
@@ -44,6 +47,7 @@ protected :
 	// 0번 index 가 가장 낮은 가치를 지님
 	MinRock m_rock[3];
 
+	// 현제 스테이지
 	static int m_stage;
 
 	// 스테이지 올라가기까지 필요한 암석의 갯수
@@ -54,4 +58,7 @@ protected :
 
 	// 게임의 진행 속도를 조절하는 변수
 	int TickRate; 
+
+	// 게임 내 출현하는 암석의 갯수
+	int MaximumRock;
 };
