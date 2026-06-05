@@ -14,6 +14,7 @@
 #include "Rock.h"
 #include "GameMap.h"
 #include "Plinko.h"
+#include "Enforce.h"
 
 // 2026,05,31
 #include "Bullet.h"
