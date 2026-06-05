@@ -10,12 +10,12 @@ Player::Player()
 {
 	m_attackPower = 1;
 	max_hp = 1;
-	m_speed = 10;
+	m_speed = 4;
 	m_x = 690;
 	m_y = 400;
 	attackType = 0;
 	m_size = 20;
-	m_MaxFual = 100;
+	m_MaxFual = 15;
 	SearchBox = 20;
 	for (int i = 0; i < MAX_ROCKS; i++)
 	{

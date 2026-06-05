@@ -455,6 +455,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					double x = enforce[i].Get_Enforce_Point_x();
 					double y = enforce[i].Get_Enforce_Point_y();
 					Rectangle(mDC, x - enforce_size, y - enforce_size, x + enforce_size, y + enforce_size);
+
+					oldFont = (HFONT)SelectObject(mDC, hFont);
+					SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
+					wchar_t str[64];
+
+					//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
+					if (enforce[i].Get_Enforce_Type() == 1) {
+						wsprintf(str, L"공격력");
+					}
+					else if (enforce[i].Get_Enforce_Type() == 2) {
+						wsprintf(str, L"이동속도");
+					}
+					else if (enforce[i].Get_Enforce_Type() == 3) {
+						wsprintf(str, L"연료");
+					}
+					else if (enforce[i].Get_Enforce_Type() == 4) {
+						wsprintf(str, L"공격속도");
+					}
+					else {
+						wsprintf(str, L"미구현");
+					}
+					TextOut(mDC, x - 25, y + 20, str, lstrlen(str));
+
+					double amount = enforce[i].Get_Enforce_Amount();
+					wsprintf(str, L"%d", (int)amount);
+					TextOut(mDC, x-25, y+40, str, lstrlen(str));
 				}
 			}
 
