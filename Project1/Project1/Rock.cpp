@@ -19,7 +19,7 @@ std::default_random_engine generate(time(NULL)); // 난수 생성기 초기화
 std::uniform_int_distribution<int> minRockDist(0, 3); // 0, 1, 2 중에서 랜덤한 정수를 생성하는 분포
 
 // 암석의 종류는 암석의 종류가 n 개이면 마지막을 n-1로 초기화
-std::uniform_int_distribution<int> rockTypeDist(0, 3);
+std::uniform_int_distribution<int> rockTypeDist(0, 99);
 
 // 암석의 속도를 랜덤하게 설정하기 위한 분포
 std::uniform_int_distribution<int> speedDist(1, 5);
@@ -61,7 +61,12 @@ void Rock::Spawn()
 {
 	// 지금 해금된 암석 종류에 맞춰서 랜덤값으로 암석의 종류 선정
 	while (true) {
-		m_RockType = rockTypeDist(generate);
+		int roll = rockTypeDist(generate);
+
+		if (roll < 50)       m_RockType = 0;  // 50%
+		else if (roll < 80)  m_RockType = 1;  // 30%
+		else if (roll < 95)  m_RockType = 2;  // 15%
+		else                 m_RockType = 3;  //  5%
 
 		if (m_unlockType[m_RockType] == 1) {
 			break;
@@ -123,6 +128,10 @@ void Rock::Die()
 
 	int feedCount = (rand() % 3) + (GetStage() / 2) + 1;
 
+	if (m_RockType == 3) {
+		feedCount == 1;
+	}
+
 	for (int f = 0; f < feedCount; f++) {
 		for (int k = 0; k < MAX_FEEDS; k++) {
 			if (!feed[k].GetActive()) {
@@ -157,6 +166,11 @@ void Rock::Draw(HDC mDC)
 	HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
 	HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
 	
+	if (m_RockType == 3) {
+		rBRUSH = CreateSolidBrush(RGB(255, 255, 0));
+		oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
+	}
+
 	Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
 	DeleteObject(rBRUSH);
 }

@@ -63,6 +63,8 @@ private:
 	int FeedNum;
 
 	const int m_MaxRockType = 4; // 암석의 최대 종류
-	int m_unlockType[4] = { 1,0,0,0 }; // 지금 암석이 나오는 종류
+
+	// 지금 암석이 나오는 종류, 4번 인덱스는 무기상자 이다.
+	int m_unlockType[4] = { 1,0,0,1 }; 
 
 };

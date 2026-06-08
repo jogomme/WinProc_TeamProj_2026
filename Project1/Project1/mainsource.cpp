@@ -106,11 +106,15 @@ int yPos{};
 // 현재 최대 총알 갯수
 int BulletCnt{};
 
-// 스테이지 넘어가기 까지 눌러야하는 스페이스바 꾹 수
+// 스테이지 넘어가기 까지 눌러야하는 스페이스바 꾹 수, 3초 기준
 const int isSpaceBarDown = 85;
 
 // 지금 얼마나 눌렀는지
 int isDowning = 0;
+
+// 무기 상자 시간 변수, 기본 6초 추후 늘려도 됌
+unsigned MAX_AttackTypeChanged = 170;
+unsigned isAttackTypeChanged = 170;
 
 // 게임 상태 변수
 bool isGaming = false;
@@ -120,6 +124,7 @@ const int GoMove{ 1 };
 const int GoAttack{ 2 };
 const int GoConsumeFual{ 3 };
 const int GoShow{ -1 };
+const int SetAttackType{ 4 };
 
 // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
 int window_scene{0};
@@ -227,6 +232,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				isDowning++;
 				if (isDowning >= isSpaceBarDown) {
 					gMap.NextStage();
+					for (int i = 0; i < MAX_FEED; ++i) {
+						feed[i].SetActive(false);
+					}
 				}
 			}
 		}
@@ -687,6 +695,12 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	//  공격 관련 타이머
 	//--------------------------------------------------------------------
 	else if (idEvent == GoAttack) {
+		
+		if (player.GetAttackTypeChanged()) {
+			SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
+			SetTimer(hWnd, SetAttackType, 16, (TIMERPROC)TimerProc);
+			player.SetAttackTypeChanged(false);
+		}
 
 		int targetRockID = player.GetMinLengthID();
 
@@ -707,6 +721,17 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 	//--------------------------------------------------------------------
 	else if (idEvent == GoConsumeFual) {
 		player.ConsumeFual();
+	}
+	//--------------------------------------------------------------------
+	// 무기 상자 교체 타이머
+	//--------------------------------------------------------------------
+	else if (idEvent == SetAttackType) {
+		isAttackTypeChanged--;
+		if (isAttackTypeChanged == 0) {
+			KillTimer(hWnd, SetAttackType);
+			player.SetAttackType(0);
+			isAttackTypeChanged = MAX_AttackTypeChanged;
+		}
 	}
 
 	ReleaseDC(hWnd, hDC);
@@ -731,7 +756,7 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 
 		// 화면 중앙 고정
 		SetCursorPos(width / 2, height / 2);
-
+		player.SetAttackTypeChanged(false);
 		// 플레이어 태어남
 		player.Spawn();
 
@@ -748,6 +773,10 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 			bullet[i].SetActive(false); 
 		}
 
+		for (int i = 0; i < MAX_FEED; ++i) {
+			feed[i].SetActive(false);
+		}
+
 		SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
@@ -761,6 +790,7 @@ void GameOver(HWND hWnd)
 	KillTimer(hWnd, GoConsumeFual);
 
 	isGaming = false;
+	InvalidateRect(hWnd, NULL, false);
 }
 
 void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)

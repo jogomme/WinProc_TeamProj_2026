@@ -26,6 +26,10 @@ Player::Player()
 	// 1초에 1발은 쏜다는 것을 목표로 설정
 	m_AttackSpeed_type_0 = 1000;
 	m_AttackSpeed_type_1 = 500;
+
+	m_AttackSpeed = m_AttackSpeed_type_0;
+
+	m_AttackTypeChanged = false;
 }	
 
 Player::~Player()
@@ -57,7 +61,7 @@ void Player::SetLength(const Rock& r)
 // Getter
 int Player::GetAttackSpeed()
 {
-	return m_AttackSpeed_type_0;
+	return m_AttackSpeed;
 }
 
 double Player::GetSearchBox() const
@@ -93,6 +97,11 @@ int Player::GetMaxFual()
 	return m_MaxFual;
 }
 
+bool Player::GetAttackTypeChanged() const
+{
+	return m_AttackTypeChanged;
+}
+
 void Player::Spawn()
 {
 	m_hp = max_hp;
@@ -122,16 +131,7 @@ void Player::attack(Rock& r)
 	}
 
 	// attckType이 0이면 기본 공격
-	if (attackType == 0)
-	{
-		// 최소거리에 있는 암석이 공격받는 암석이면 데미지를 받는다.
-		if (rID == rMinID && m_length[rID] != -1) { 
-			r.GetDemege(m_attackPower); 
-		}
-	}
-	else if (attackType == 1) {
-		m_AttackSpeed = m_AttackSpeed_type_1;
-	}
+	
 }
 
 void Player::Move(double targetX, double targetY)
@@ -210,6 +210,14 @@ void Player::ConsumeFual()
 void Player::SetAttackType(int type) 
 {
 	attackType = type;
+	if (attackType == 0)
+	{
+		m_AttackSpeed = m_AttackSpeed_type_0;
+	}
+	else if (attackType == 1) {
+		m_AttackSpeed = m_AttackSpeed_type_1;
+	}
+	m_AttackTypeChanged = true;
 }
 
 void Player::SetSearchBox(double deg)
@@ -240,4 +248,16 @@ void Player::SetAttackSpeed(double deg)
 {
 	m_AttackSpeed_type_0 -= deg;
 	m_AttackSpeed_type_1 -= deg * 2;
+
+	if (m_AttackSpeed_type_0 <= 0) {
+		m_AttackSpeed_type_0 = 0;
+	}
+	if (m_AttackSpeed_type_1 <= 0) {
+		m_AttackSpeed_type_1 = 0;
+	}
+}
+
+void Player::SetAttackTypeChanged(bool b)
+{
+	m_AttackTypeChanged = b;
 }

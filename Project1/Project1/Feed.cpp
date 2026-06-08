@@ -3,7 +3,12 @@
 #include"Feed.h"
 #include<random>
 #include<iostream>
+#include"Player.h"
 
+extern Player player;
+
+std::default_random_engine generate2(time(NULL)); // 난수 생성기 초기화
+std::uniform_int_distribution<int> AttackTypeDist(1, 1); // 0, 1, 2 중에서 랜덤한 정수를 생성하는 분포
 
 Feed::Feed()
 {
@@ -27,25 +32,34 @@ void Feed::Drop(const Rock& r)
 
 	isActive = true;
 
-	m_RockType = GetRockType();
+	m_RockType = r.GetRockType();
 
-	int randomX = (rand() % 200) - 100;
-	int randomY = (rand() % 200) - 100;
-	setDirection(m_x + randomX, m_y + randomY);
+	if (m_RockType != 3) {
+		int randomX = (rand() % 200) - 100;
+		int randomY = (rand() % 200) - 100;
+		setDirection(m_x + randomX, m_y + randomY);
+	} 
+	else {
 
+	}
 	// 3. 파편의 튀는 속도를 랜덤하게 지정
 	m_speed = ((rand() % 5) + 3)/3;
 }
 
-void Feed::SetLength(const Player& p)
+void Feed::SetLength(Player& p)
 {
 	double dx = m_x - p.GetX();
 	double dy = m_y - p.GetY();
 	double length = sqrt(dx * dx + dy * dy);
 	
 	if (length - p.GetSearchBox() <= m_size) {
-		GameMap::m_rock[m_RockType].Num++;
-		GameMap::m_rock[m_RockType].Price = m_price;
+		if (m_RockType != 3) {
+			GameMap::m_rock[m_RockType].Num++;
+			GameMap::m_rock[m_RockType].Price = m_price;
+		}
+		else {
+			player.SetAttackType(AttackTypeDist(generate2));
+		}
 		isActive = false;
 	}
 }
@@ -61,4 +75,10 @@ void Feed::Move(double x, double y)
 	if (m_x < -50 || m_x > x + 50 || m_y < -50 || m_y > y + 50) {
 		isActive = false;
 	}
+}
+
+
+void Feed::SetActive(bool b)
+{
+	isActive = b;
 }

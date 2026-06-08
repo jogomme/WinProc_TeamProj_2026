@@ -1,7 +1,6 @@
 #include "Plinko.h"
 #include "Player.h"
 #include "GameObject.h"
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 
 #define ROCK_SIZE 40	// 운석 사이즈

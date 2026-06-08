@@ -34,6 +34,8 @@ public:
 
 	double GetSearchBox() const;
 
+	bool GetAttackTypeChanged() const;
+
 	//최소 거리에 있는 암석의 위치 반환 함수
 	Point GetMinLengthRock();
 	
@@ -46,6 +48,8 @@ public:
 	void SetAttackPower(double deg); // 공격력 설정 함수
 	void SetAttackSpeed(double deg);
 	void SetSearchBox(double deg);
+
+	void SetAttackTypeChanged(bool b);
 
 	void Spawn();
 
@@ -73,6 +77,9 @@ private:
 	int m_AttackSpeed;			// 현재 공격 속도
 	int m_AttackSpeed_type_0;	// 기본 공격 속도
 	int m_AttackSpeed_type_1;	// 체인건 공격 속도
+
+	// 공격 타입이 변했음을 알리는 변수 
+	bool m_AttackTypeChanged;
 
 	double m_length[MAX_ROCKS]; // 플레이어와 암석 사이의 거리
 };

@@ -14,7 +14,9 @@ public :
 
 	void Drop(const Rock& r);
 
-	void SetLength(const Player& p);
+	void SetLength(Player& p);
+
+	void SetActive(bool b);
 
 	void Move(double x, double y) override;
 
