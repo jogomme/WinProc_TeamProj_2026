@@ -7,6 +7,8 @@
 #include<queue>
 #include<random>
 #pragma comment (lib, "msimg32.lib")
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 #include "resource.h"
 #include "GameObject.h"
@@ -15,11 +17,9 @@
 #include "GameMap.h"
 #include "Plinko.h"
 #include "Enforce.h"
-
 #include "Feed.h"
-
-// 2026,05,31
 #include "Bullet.h"
+#include "sound.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";
@@ -203,7 +203,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		drag = 0;
 
-		player.Move(rectViewMid.x / 10, rectViewMid.y / 10); // 시작시 중앙 세팅. /10 <- 플레이어 기본 속도
+		Open_Sound();
+
+		mciSendString(L"play BGM_Lobby repeat", NULL, 0, NULL);
 
 		break;
 
@@ -219,6 +221,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			for (int i = 1; i <= timercnt; i++) {
 				KillTimer(hWnd, i);
 			}
+
+			Stop_BGM();
+			Quit_SoundAll();
 			PostQuitMessage(0);
 			return 0;
 		}
@@ -337,6 +342,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				if ((mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
 					my > rectViewMid.y - 30 && my < rectViewMid.y + 30)) {
 					window_scene = 1;
+					mciSendString(L"stop BGM_Fight", NULL, 0, NULL);
+					mciSendString(L"play BGM_Lobby repeat", NULL, 0, NULL);
 				}
 			}
 		}
@@ -751,6 +758,9 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 		SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
+
+		mciSendString(L"stop BGM_Lobby", NULL, 0, NULL);
+		mciSendString(L"play BGM_Fight repeat", NULL, 0, NULL);
 	}
 }
 
