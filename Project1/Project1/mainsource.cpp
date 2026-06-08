@@ -85,7 +85,7 @@ void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 //-----------------------------------------------------------------------------------------------
 
 // 콘솔 창 띄우는 용도입니다. Debug(디버그) 용도입니다.
-//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 #define MAX_ROCKS 50
 #define MAX_BULLETS 150
@@ -279,6 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			else if (mx > rectView.left + 5 && mx < rectView.left + 105 &&
 				my > rectView.top + 5 && my < rectView.top + 45) {
 				window_scene = 4;
+				plinkoStart = TRUE;
 				break;
 			}
 
@@ -571,8 +572,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		else if (window_scene == 4) {
+			if (plinkoEmptyCheck() && plinkoStart) {
+
+				PlinkoRestart();
+				PlinkoRock::plinkoNumInit();
+				plinkoStart = FALSE;
+
+				SetTimer(hWnd, 4, 1, NULL);	//  플랑코 타이머 시작
+			}
 			plinkoInit(hWnd);
+
 			plinkoDraw(mDC);
+			rocksDraw(mDC);
+
 
 			oldFont = (HFONT)SelectObject(mDC, hFont);
 			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
@@ -622,6 +634,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		case 1:
 			//player.Move(xPos, yPos);
 			break;
+		case 4:
+			rockUpdate();
+			checkGoal();
+			pTimerCheck(hWnd);	// 플랑코 타이머 죽이기
+
+			break;
+
 		}
 
 		InvalidateRect(hWnd, NULL, false);
