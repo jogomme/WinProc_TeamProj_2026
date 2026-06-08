@@ -673,6 +673,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		for (int i = 1; i <= timercnt; i++) {
 			KillTimer(hWnd, i);
 		}
+
+		Stop_BGM();
+		Quit_SoundAll();
 		PostQuitMessage(0);
 		return 0;
 	}
