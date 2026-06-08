@@ -7,6 +7,8 @@
 #include<queue>
 #include<random>
 #pragma comment (lib, "msimg32.lib")
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 #include "resource.h"
 #include "GameObject.h"
@@ -15,11 +17,9 @@
 #include "GameMap.h"
 #include "Plinko.h"
 #include "Enforce.h"
-
 #include "Feed.h"
-
-// 2026,05,31
 #include "Bullet.h"
+#include "sound.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";
@@ -208,7 +208,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		drag = 0;
 
-		player.Move(rectViewMid.x / 10, rectViewMid.y / 10); // 시작시 중앙 세팅. /10 <- 플레이어 기본 속도
+		Open_Sound();
+
+		Play_Sound_BGM(L"BGM_Lobby");
 
 		break;
 
@@ -224,6 +226,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			for (int i = 1; i <= timercnt; i++) {
 				KillTimer(hWnd, i);
 			}
+
+			Stop_BGM();
+			Quit_SoundAll();
 			PostQuitMessage(0);
 			return 0;
 		}
@@ -249,6 +254,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN:
 		mx = LOWORD(lParam);
 		my = HIWORD(lParam);
+
+		Play_Sound(L"EFFECT_Click1");
 
 		// 메인 화면
 		if (window_scene == 0) {
@@ -305,25 +312,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					my > enforce[i].Get_Enforce_Point_y() - enforce_size && my < enforce[i].Get_Enforce_Point_y() + enforce_size &&
 					enforce[i].Get_Enforce_Draw() == 1 && enforce[i].Get_Enforce_Open()==0) {
 					// 가격 관련 조건, 마이너스 필요
-					ck = 1;
-					enforce[i].Set_Open(1);
-					enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
-					enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
-					enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
+					if (false) {
+						Play_Sound(L"EFFECT_FEnforce");
+					}
+					else {
+						Play_Sound(L"EFFECT_Enforce");
+						ck = 1;
+						enforce[i].Set_Open(1);
+						enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
+						enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
+						enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
 
-					double amount = enforce[i].Get_Enforce_Amount();
-					//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
-					if (enforce[i].Get_Enforce_Type() == 1) {
-						player.SetAttackPower(amount);
-					}
-					else if (enforce[i].Get_Enforce_Type() == 2) {
-						player.SetSpeed(amount);
-					}
-					else if (enforce[i].Get_Enforce_Type() == 3) {
-						player.SetFual(amount);
-					}
-					else if (enforce[i].Get_Enforce_Type() == 4) {
-						player.SetAttackSpeed(amount);
+						double amount = enforce[i].Get_Enforce_Amount();
+						//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
+						if (enforce[i].Get_Enforce_Type() == 1) {
+							player.SetAttackPower(amount);
+						}
+						else if (enforce[i].Get_Enforce_Type() == 2) {
+							player.SetSpeed(amount);
+						}
+						else if (enforce[i].Get_Enforce_Type() == 3) {
+							player.SetFual(amount);
+						}
+						else if (enforce[i].Get_Enforce_Type() == 4) {
+							player.SetAttackSpeed(amount);
+						}
 					}
 				}
 			}
@@ -346,6 +359,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				if ((mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
 					my > rectViewMid.y - 30 && my < rectViewMid.y + 30)) {
 					window_scene = 1;
+					Stop_BGM();
+					Play_Sound_BGM(L"BGM_Lobby");
 				}
 			}
 		}
@@ -799,6 +814,9 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 		SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
+
+		Stop_BGM();
+		Play_Sound_BGM(L"BGM_Fight");
 	}
 }
 
