@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "Bullet.h"
+#include "sound.h"
 
 #define INF 999
 
@@ -40,6 +41,8 @@ void Bullet::Spawn(const Player& p, const Rock& r)
 	m_y = py;
 
 	SetDir(r);
+
+	Play_Sound(L"EFFECT_Shoot");
 }
 
 // 이동 함수

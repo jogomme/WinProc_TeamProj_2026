@@ -205,7 +205,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		Open_Sound();
 
-		mciSendString(L"play BGM_Lobby repeat", NULL, 0, NULL);
+		Play_Sound_BGM(L"BGM_Lobby");
 
 		break;
 
@@ -246,6 +246,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN:
 		mx = LOWORD(lParam);
 		my = HIWORD(lParam);
+
+		Play_Sound(L"EFFECT_Click1");
 
 		// 메인 화면
 		if (window_scene == 0) {
@@ -301,25 +303,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					my > enforce[i].Get_Enforce_Point_y() - enforce_size && my < enforce[i].Get_Enforce_Point_y() + enforce_size &&
 					enforce[i].Get_Enforce_Draw() == 1 && enforce[i].Get_Enforce_Open()==0) {
 					// 가격 관련 조건, 마이너스 필요
-					ck = 1;
-					enforce[i].Set_Open(1);
-					enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
-					enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
-					enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
+					if (false) {
+						Play_Sound(L"EFFECT_FEnforce");
+					}
+					else {
+						Play_Sound(L"EFFECT_Enforce");
+						ck = 1;
+						enforce[i].Set_Open(1);
+						enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
+						enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
+						enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
 
-					double amount = enforce[i].Get_Enforce_Amount();
-					//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
-					if (enforce[i].Get_Enforce_Type() == 1) {
-						player.SetAttackPower(amount);
-					}
-					else if (enforce[i].Get_Enforce_Type() == 2) {
-						player.SetSpeed(amount);
-					}
-					else if (enforce[i].Get_Enforce_Type() == 3) {
-						player.SetFual(amount);
-					}
-					else if (enforce[i].Get_Enforce_Type() == 4) {
-						player.SetAttackSpeed(amount);
+						double amount = enforce[i].Get_Enforce_Amount();
+						//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
+						if (enforce[i].Get_Enforce_Type() == 1) {
+							player.SetAttackPower(amount);
+						}
+						else if (enforce[i].Get_Enforce_Type() == 2) {
+							player.SetSpeed(amount);
+						}
+						else if (enforce[i].Get_Enforce_Type() == 3) {
+							player.SetFual(amount);
+						}
+						else if (enforce[i].Get_Enforce_Type() == 4) {
+							player.SetAttackSpeed(amount);
+						}
 					}
 				}
 			}
@@ -342,8 +350,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				if ((mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
 					my > rectViewMid.y - 30 && my < rectViewMid.y + 30)) {
 					window_scene = 1;
-					mciSendString(L"stop BGM_Fight", NULL, 0, NULL);
-					mciSendString(L"play BGM_Lobby repeat", NULL, 0, NULL);
+					Stop_BGM();
+					Play_Sound_BGM(L"BGM_Lobby");
 				}
 			}
 		}
@@ -759,8 +767,8 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
 
-		mciSendString(L"stop BGM_Lobby", NULL, 0, NULL);
-		mciSendString(L"play BGM_Fight repeat", NULL, 0, NULL);
+		Stop_BGM();
+		Play_Sound_BGM(L"BGM_Fight");
 	}
 }
 
@@ -771,6 +779,8 @@ void GameOver(HWND hWnd)
 	KillTimer(hWnd, GoConsumeFual);
 
 	isGaming = false;
+
+	InvalidateRect(hWnd, NULL, false);
 }
 
 void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
