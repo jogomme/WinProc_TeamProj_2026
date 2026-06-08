@@ -34,7 +34,9 @@ void Quit_SoundAll()
 	mciSendString(L"close BGM_Lobby", NULL, 0, NULL);
 	mciSendString(L"close BGM_Fight", NULL, 0, NULL);
 	mciSendString(L"close BGM_Boss", NULL, 0, NULL);
+
 	mciSendString(L"close EFFECT_Click1", NULL, 0, NULL);
+	mciSendString(L"close EFFECT_Enforce", NULL, 0, NULL);
 	mciSendString(L"close EFFECT_FEnforce", NULL, 0, NULL);
 	mciSendString(L"close EFFECT_Coin", NULL, 0, NULL);
 	mciSendString(L"close EFFECT_Shoot", NULL, 0, NULL);
