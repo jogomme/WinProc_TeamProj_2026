@@ -78,18 +78,22 @@ void Rock::Spawn()
 	// 암석의 종류에 맞춰서 체력과 가격 설정
 	if (m_RockType == 0) {
 		m_hp = 1 + GetStage() * 1.2;
+		max_hp = m_hp;
 		m_price = 1;
 	}
 	else if (m_RockType == 1) {
 		m_hp = 2 + GetStage() * 1.2;
+		max_hp = m_hp;
 		m_price = 5;
 	}
 	else if (m_RockType == 2) {
 		m_hp = 3 + GetStage() * 1.2;
+		max_hp = m_hp;
 		m_price = 15;
 	}
 	else if (m_RockType == 3) {
 		m_hp = 4 + GetStage() * 1.2;
+		max_hp = m_hp;
 		m_price = 50;
 	}
 
@@ -161,18 +165,31 @@ void Rock::Move(double x, double y)
 }
 
 // 그리기 함수
-void Rock::Draw(HDC mDC)
+void Rock::Draw(HDC mDC, COLORREF color)
 {
-	HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
-	HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
-	
-	if (m_RockType == 3) {
-		rBRUSH = CreateSolidBrush(RGB(255, 255, 0));
-		oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
+	if (!isActive) return;
+
+	if (m_hp < max_hp && m_hp > 0) {
+		HBRUSH whiteBRUSH = CreateSolidBrush(RGB(255, 255, 255));
+		HBRUSH oldwhiteBRUSH = (HBRUSH)SelectObject(mDC, whiteBRUSH);
+		Rectangle(mDC, m_x - m_size - 10, m_y - m_size - 20, m_x + m_size + 10, m_y - m_size);
+		SelectObject(mDC, oldwhiteBRUSH); 
+		DeleteObject(whiteBRUSH);        
+
+		HBRUSH hpBRUSH = CreateSolidBrush(color);
+		HBRUSH oldhpBRUSH = (HBRUSH)SelectObject(mDC, hpBRUSH);
+		double hpRate = m_hp / max_hp;
+		Rectangle(mDC, m_x - m_size - 10, m_y - m_size - 20, m_x - m_size + (hpRate * 2 * m_size), m_y - m_size);
+		SelectObject(mDC, oldhpBRUSH); 
+		DeleteObject(hpBRUSH);         
 	}
 
+	HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
+	HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
 	Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
-	DeleteObject(rBRUSH);
+
+	SelectObject(mDC, oldrBRUSH);         
+	DeleteObject(rBRUSH);                
 }
 
 void Rock::UnlockRockType(int rockType)
@@ -180,6 +197,11 @@ void Rock::UnlockRockType(int rockType)
 	if (rockType >= 0 && rockType < m_MaxRockType) {
 		m_unlockType[rockType] = 1;
 	}
+}
+
+void Rock::SetActive(bool b)
+{
+	isActive = b;
 }
 
 void Rock::SetRockPos()

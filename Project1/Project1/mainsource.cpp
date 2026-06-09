@@ -78,8 +78,8 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime);
 void GameStart(HWND hWnd, RECT& rect, int mx, int my, int& WinSinec);
 void GameOver(HWND hWnd);
 
-void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
-
+void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
+void GameSleep(HWND hWnd);
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
@@ -125,6 +125,7 @@ const int GoAttack{ 2 };
 const int GoConsumeFual{ 3 };
 const int GoShow{ -1 };
 const int SetAttackType{ 4 };
+const int GoRarityShuffle{ 5 };
 
 // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
 int window_scene{0};
@@ -237,9 +238,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				isDowning++;
 				if (isDowning >= isSpaceBarDown) {
 					gMap.NextStage();
+					player.SetAttackType(0);
 					for (int i = 0; i < MAX_FEED; ++i) {
 						feed[i].SetActive(false);
 					}
+					gMap.StartRarityShuffle();
+					SetTimer(hWnd, GoRarityShuffle, 100, (TIMERPROC)TimerProc); // 100ms마다 갱신
+					isDowning = 0; // 스페이스바 게이지 초기화
+					GameSleep(hWnd);
 				}
 			}
 		}
@@ -310,7 +316,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			for (int i = 0; i < MAX_ENFORCE; i++) {
 				if (mx > enforce[i].Get_Enforce_Point_x() - enforce_size && mx < enforce[i].Get_Enforce_Point_x() + enforce_size &&
 					my > enforce[i].Get_Enforce_Point_y() - enforce_size && my < enforce[i].Get_Enforce_Point_y() + enforce_size &&
-					enforce[i].Get_Enforce_Draw() == 1 && enforce[i].Get_Enforce_Open()==0) {
+					enforce[i].Get_Enforce_Draw() == 1 && enforce[i].Get_Enforce_Open() == 0) {
 					// 가격 관련 조건, 마이너스 필요
 					if (false) {
 						Play_Sound(L"EFFECT_FEnforce");
@@ -319,9 +325,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						Play_Sound(L"EFFECT_Enforce");
 						ck = 1;
 						enforce[i].Set_Open(1);
-						enforce[enforce[i].Get_Enforce_Drawing(0)].Set_Draw(1);
-						enforce[enforce[i].Get_Enforce_Drawing(1)].Set_Draw(1);
-						enforce[enforce[i].Get_Enforce_Drawing(2)].Set_Draw(1);
+
+						// 강화 버튼이 눌러졌을 때 그 다음에 켜지는 강화 버튼이 없다면
+						// MaximumRocks를 침범하여 강제로 -1로 고정하기 때문에
+						// 이러한 코드를 사용하여 방지하였습니다.
+						int next1 = enforce[i].Get_Enforce_Drawing(0);
+						int next2 = enforce[i].Get_Enforce_Drawing(1);
+						int next3 = enforce[i].Get_Enforce_Drawing(2);
+
+						if (next1 >= 0 && next1 < MAX_ENFORCE) enforce[next1].Set_Draw(1);
+						if (next2 >= 0 && next2 < MAX_ENFORCE) enforce[next2].Set_Draw(1);
+						if (next3 >= 0 && next3 < MAX_ENFORCE) enforce[next3].Set_Draw(1);
 
 						double amount = enforce[i].Get_Enforce_Amount();
 						//type 1-공격, 2-이동속도, 3-연료, 4-공격속도
@@ -436,7 +450,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		InvalidateRect(hWnd, NULL, false);
 		break;
 
-	case WM_PAINT:
+	case WM_PAINT:{
 		// 기초 로드
 		hDC = BeginPaint(hWnd, &ps);
 		mDC = CreateCompatibleDC(hDC);
@@ -445,15 +459,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		Rectangle(mDC, 0, 0, rectView.right, rectView.bottom);
 		imgDC = CreateCompatibleDC(mDC);
 
+		HBITMAP oldHBitmap = (HBITMAP)SelectObject(mDC, hBitmap);
+
 		// 필요 내용 작성은 이 밑으로.
 
 		oldPen = (HPEN)SelectObject(mDC, hPen[0]);
 		// 게임 시작 화면
 		if (window_scene == 0) {
+
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
 			//시작 버튼
 			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 20, rectViewMid.x + 100, rectViewMid.y + 20);
-			
+
 			oldFont = (HFONT)SelectObject(mDC, hFont);
 			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 			wchar_t str[64];
@@ -505,7 +522,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 					double amount = enforce[i].Get_Enforce_Amount();
 					wsprintf(str, L"%d", (int)amount);
-					TextOut(mDC, x-25, y+40, str, lstrlen(str));
+					TextOut(mDC, x - 25, y + 40, str, lstrlen(str));
 				}
 			}
 
@@ -522,7 +539,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			// 플링코 화면 진입 버튼
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[6]);
-			Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 105, rectView.top +45);
+			Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 105, rectView.top + 45);
 
 			wsprintf(str, L"Plinko"); // 추후 이미지 버튼 등으로 변경 예정
 			TextOut(mDC, rectView.left + 25, rectView.top + 15, str, lstrlen(str));
@@ -543,17 +560,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		// 전투 화면
 		else if (window_scene == 2) {
+			HBITMAP oldImgBmp = NULL;
 			// 배경
-			SelectObject(imgDC, imgBitmap[0]);
+			if (gMap.GetRare() == 0) {
+				oldImgBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[0]);
+			}
+			else if (gMap.GetRare() == 1) {
+				oldImgBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[1]);
+			}
+			else if (gMap.GetRare() == 2) {
+				oldImgBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[2]);
+			}
+			else if (gMap.GetRare() == 3) {
+				oldImgBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[3]);
+			}
+			else if (gMap.GetRare() == 4) {
+				oldImgBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[4]);
+			}
 			StretchBlt(mDC, 0, 0, rectView.right, rectView.bottom, imgDC, 0, 0, imgBmp.bmWidth, imgBmp.bmHeight, SRCCOPY);
 
-			Draw(mDC, hWnd, rectView, hBrush, hFont);
+			SelectObject(imgDC, oldImgBmp);
+
+			DrawFight(mDC, hWnd, rectView, hBrush, hFont);
 
 			// 강제 사망 (임시)
 			{
 				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
 				Rectangle(mDC, rectView.left + 5, rectView.top + 50, rectView.left + 35, rectView.top + 80);
-				
+
 				oldFont = (HFONT)SelectObject(mDC, hFont);
 				SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 				wchar_t str[64];
@@ -642,13 +676,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// 더블 버퍼링
 		BitBlt(hDC, 0, 0, rectView.right, rectView.bottom, mDC, 0, 0, SRCCOPY);
 
+		SelectObject(mDC, oldHBitmap);
+
 		// 사용한 DC 반환
 		DeleteDC(mDC);
 		DeleteObject(hBitmap);
 
 		EndPaint(hWnd, &ps);
 		break;
-
+	}
 	case WM_TIMER:
 		switch (wParam) {
 		case 1:
@@ -679,6 +715,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		for (int i = 1; i <= timercnt; i++) {
 			KillTimer(hWnd, i);
 		}
+		KillTimer(hWnd, GoMove);
+		KillTimer(hWnd, GoAttack);
+		KillTimer(hWnd, GoConsumeFual);
+		KillTimer(hWnd, SetAttackType);
+		KillTimer(hWnd, GoRarityShuffle);
 
 		Stop_BGM();
 		Quit_SoundAll();
@@ -776,6 +817,19 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			isAttackTypeChanged = MAX_AttackTypeChanged;
 		}
 	}
+	//--------------------------------------------------------------------
+	// 레어도 셔플 타이머
+	//--------------------------------------------------------------------
+	else if (idEvent == GoRarityShuffle) {
+		if (!gMap.UpdateRarityShuffle()) {
+			// 셔플이 완전히 끝나면 (false를 반환하면) 타이머를 끕니다.
+			KillTimer(hWnd, GoRarityShuffle);
+			SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
+			SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
+			SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
+		}
+		// 100ms마다 화면을 무효화하여 새로운 레어도 텍스트를 그리게 함
+	}
 
 	ReleaseDC(hWnd, hDC);
 	InvalidateRect(hWnd, NULL, false);
@@ -808,6 +862,10 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 
 		isGaming = true;
 
+		for (int i = 0; i < MAX_ROCKS; ++i) {
+			rock[i].SetActive(false);
+		}
+
 		for (int i = 0; i < gMap.GetMaximumRock(); ++i) {
 			rock[i].Spawn();
 		}
@@ -834,12 +892,14 @@ void GameOver(HWND hWnd)
 	KillTimer(hWnd, GoMove);
 	KillTimer(hWnd, GoAttack);
 	KillTimer(hWnd, GoConsumeFual);
+	KillTimer(hWnd, SetAttackType);    
+	KillTimer(hWnd, GoRarityShuffle);
 
 	isGaming = false;
 	InvalidateRect(hWnd, NULL, false);
 }
 
-void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
+void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 {
 	// 총알 Draw
 	for (int i = 0; i < MAX_BULLETS; ++i) {
@@ -851,7 +911,7 @@ void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	// 운석 Draw
 	for (int i = 0; i < MAX_ROCKS; ++i) {
 		if (rock[i].GetActive()) {
-			rock[i].Draw(mDC);
+			rock[i].Draw(mDC, RGB(255, 0, 0));
 		}
 	}
 
@@ -863,7 +923,18 @@ void Draw(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 
 	for (int i = 0; i < MAX_FEED; ++i) {
 		if (feed[i].GetActive()) {
-			feed[i].Draw(mDC);
+			feed[i].Draw(mDC, RGB(0, 255, 0));
 		}
 	}
+
+	if (gMap.isNextStage()) {
+		gMap.DrawNextStage(mDC, rectView, hBrush, hFont);
+	}
+}
+
+void GameSleep(HWND hWnd)
+{
+	KillTimer(hWnd, GoMove);
+	KillTimer(hWnd, GoAttack);
+	KillTimer(hWnd, GoConsumeFual);
 }

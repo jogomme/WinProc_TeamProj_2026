@@ -30,17 +30,26 @@ public:
 	int GetTickRate() const;
 	int GetMaximumRock() const;
 	bool isfull() const;
+	bool isNextStage() const;
+	int GetRare() const;
 
 	// Set 함수
 	void SetStage(int stage);
 	void SetRockNum();
 	void SetMaximumRock(int plusNum);
 
+
 	// 다음 스테이지로 넘어가는 함수
 	void NextStage(); 
 
 	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 
+	// 다음 스테이지로 갔을 때 레어도를 보여주고 결정하는 함수
+	void DrawNextStage(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
+
+	void StartRarityShuffle();
+
+	bool UpdateRarityShuffle();
 protected :
 
 	// 부숴진 암석의 종류와 갯수를 저장하는 배열
@@ -49,6 +58,9 @@ protected :
 
 	// 현제 스테이지
 	static int m_stage;
+
+	// 스테이지가 올라가는 것을 인지하는 변수
+	bool m_isNextStage;
 
 	// 스테이지 올라가기까지 필요한 암석의 갯수
 	int m_goal;
@@ -61,4 +73,10 @@ protected :
 
 	// 게임 내 출현하는 암석의 갯수
 	int MaximumRock;
+
+	// 현재 맵의 레어도
+	static int m_rare;
+
+	int m_shuffleCount;
+	int m_maxShuffle;
 };

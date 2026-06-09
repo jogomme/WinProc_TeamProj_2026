@@ -47,6 +47,7 @@ public:
 
 protected :
 	int m_hp; // 체력
+	int max_hp; // 최대 체력
 	double m_x;  // x 좌표
 	double m_y;  // y 좌표
 	double m_speed; // 이동 속도

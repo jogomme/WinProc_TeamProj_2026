@@ -32,13 +32,15 @@ public:
 	void Move(double x, double y) override; // 완
 
 	// 그리기 함수
-	void Draw(HDC mDC);
+	void Draw(HDC mDC, COLORREF color);
 
 	// 암석 해금 함수
 	void UnlockRockType(int rockType); // 완
 
 	// 운석 생성 함수
 	void Spawn();
+
+	void SetActive(bool b);
 
 	// 운석 위치 세팅 함수
 	void SetRockPos();
