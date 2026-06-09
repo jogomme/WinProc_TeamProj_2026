@@ -63,6 +63,7 @@ void Bullet::Draw(HDC mDC)
 
 	Ellipse(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
 	
+	SelectObject(mDC, oldbBrush);
 	DeleteObject(bBrush);
 }
 
