@@ -598,11 +598,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 				SetTimer(hWnd, 4, 1, NULL);	//  플랑코 타이머 시작
 			}
+
 			plinkoInit(hWnd);
 
+			MoneyBoxDraw(mDC);
 			plinkoDraw(mDC);
 			rocksDraw(mDC);
-
 
 			oldFont = (HFONT)SelectObject(mDC, hFont);
 			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
@@ -653,12 +654,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			//player.Move(xPos, yPos);
 			break;
 		case 4:
+
+			pinCollisionCheck();	// pin - rock
+			rockCollisionCheck();	// rock - rock
 			rockUpdate();
 			checkGoal();
 			pTimerCheck(hWnd);	// 플랑코 타이머 죽이기
-
 			break;
-
 		}
 
 		InvalidateRect(hWnd, NULL, false);

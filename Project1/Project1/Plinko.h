@@ -18,7 +18,7 @@ extern int userCash;	// 유저 보유 머니
 class PlinkoRock : public GameObject
 {
 public:
-	PlinkoRock(const MinRock& rock);
+	PlinkoRock(const MinRock& rock, int type);
 	~PlinkoRock();
 
 	int p_price;	// 돈
@@ -34,16 +34,19 @@ public:
 void checkGoal();
 
 void plinkoDraw(HDC hDC);
+void MoneyBoxDraw(HDC hDC);	// 돈 표시
 
 void plinkoInit(HWND hWnd);
-void plinkoSpawn(const MinRock& rock);	// 벡터에 rock 넣기
+void plinkoSpawn(const MinRock& rock, int type);	// 벡터에 rock 넣기
 
 void rocksDraw(HDC hDC);
 void rockUpdate();
 
 void pTimerCheck(HWND hWnd);
 
-
+// 물리 함수
+void rockCollisionCheck();
+void pinCollisionCheck();
 
 // 초기화
 void PlinkoRestart();

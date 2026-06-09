@@ -2,8 +2,6 @@
 #include "Player.h"
 #include "GameObject.h"
 #include "GameMap.h"
-// #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-
 
 #define ROCK_SIZE 40	// 운석 사이즈
 #define GOAL_LINE 700	// 플랑코 목표 지점 Y 좌표 (m_y가 넘으면 인식)
@@ -11,8 +9,13 @@
 #define PIN_ROWS 7		// 핀 가로 갯수
 #define PIN_COLS 7		// 핀 세로 갯수
 
+wchar_t plinkoStr[100];
+
 bool pCheck = FALSE;
 bool plinkoStart = FALSE;
+
+RECT plinkoBox;
+RECT MoneyBox;
 
 // 작동 / 시점 설정 변수
 int plinkoView = 1, plinkoRunning = 0; // 0 OFF, 1 ON
@@ -54,11 +57,11 @@ struct pin {	// 튕기는 핀 위치
 std::vector<PlinkoRock*> rocks;	// 운석 저장
 std::vector<pin> pinPos;	// 핀 위치 저장
 
-PlinkoRock::PlinkoRock(const MinRock& rock) {
+PlinkoRock::PlinkoRock(const MinRock& rock, int type) {
 	p_price = rock.Price;
-	p_type = rock.Num;
-
-	m_x = rand() % 1280;
+	// p_type = rock.Num;
+	p_type = type;
+	m_x = rand() % (plinkoBox.right - 300) + 150;
 	m_y = 50;
 
 	m_speed = (rand() % 5 + 5) * 0.1;
@@ -67,8 +70,8 @@ PlinkoRock::PlinkoRock(const MinRock& rock) {
 PlinkoRock::~PlinkoRock() {
 	
 }
-void PlinkoRock::plinkoNumInit() {
-	m_rock[0].Num = 0;
+void PlinkoRock::plinkoNumInit() {	// 돌 갯수 초기화 > 플랑코 재진입 시 시행
+	m_rock[0].Num = 99;
 	m_rock[1].Num = 0;
 	m_rock[2].Num = 0;
 }
@@ -79,22 +82,22 @@ int mr1 = 0, mr2 = 0, mr3 = 0;
 void PlinkoRock::spawn() {
 	
 	for (int i = 0; i < GameMap::m_rock[0].Num; i++) {
-		plinkoSpawn(GameMap::m_rock[0]);
+		plinkoSpawn(GameMap::m_rock[0], 0);
 	}
 	for (int i = 0; i < GameMap::m_rock[1].Num; i++) {
-		plinkoSpawn(GameMap::m_rock[1]);
+		plinkoSpawn(GameMap::m_rock[1], 1);
 	}
 	for (int i = 0; i < GameMap::m_rock[2].Num; i++) {
-		plinkoSpawn(GameMap::m_rock[2]);
+		plinkoSpawn(GameMap::m_rock[2], 2);
 	}
 	
 }
 
 // 벡터에 rock 넣기
-void plinkoSpawn(const MinRock& rock) {
+void plinkoSpawn(const MinRock& rock, int type) {
 	
-	rocks.push_back(new PlinkoRock(rock));
-	std::cout << "가격 : " << rock.Price << ", Num : " << rock.Num << std::endl;
+	rocks.push_back(new PlinkoRock(rock, type));
+	std::cout << "price : " << rock.Price << ", Num : " << rock.Num << std::endl;
 }
 
 void PlinkoRock::cntRock() {
@@ -110,12 +113,14 @@ int PlinkoRock::sumPrice(int totalPrice, int addPrice) {
 	return totalPrice;
 }
 
-RECT plinkoBox;
 goal goalBox[4];
 void plinkoInit(HWND hWnd) {	// 초기화
 	
 	pinPos.clear();
 	GetClientRect(hWnd, &plinkoBox);
+	// 유저 금액 표시 구역
+	MoneyBox = { plinkoBox.right - 200, plinkoBox.top + 10, plinkoBox.right - 20, plinkoBox.top + 200 };
+	
 	// 플랑코 도착 지점 4구간 x1, x2 좌표
 	goalBox[0] = { (plinkoBox.right / 4) * 0, (plinkoBox.right / 4) * 1 };
 	goalBox[1] = { (plinkoBox.right / 4) * 1, (plinkoBox.right / 4) * 2 };
@@ -175,6 +180,7 @@ bool plinkoEmptyCheck() {	// rocks 비어있는지 확인
 /***************************************************************************/
 void PlinkoRestart() {
 	zoneReset();	// 구역 배수 랜덤 초기화
+	std::cout << "zonePrice* : " << zonePrice[0] << ", " << zonePrice[1] << ", " << zonePrice[2] << ", " << zonePrice[3] << std::endl;
 	PlinkoReset();   // 기존 제거
 	PlinkoRock::spawn(); // 다시 생성
 }
@@ -226,27 +232,112 @@ void checkGoal() {
 // rock - rock 충돌 처리
 void rockCollisionCheck() {
 	// 핀과 운석, 운석과 운석 충돌 처리
-	for (auto& rock : rocks) {
-		for (auto& rock : rocks) {
+	for (int i = 0; i < rocks.size(); i++)
+	{
+		for (int j = i + 1; j < rocks.size(); j++)
+		{
+			PlinkoRock* rock1 = rocks[i];
+			PlinkoRock* rock2 = rocks[j];
 
+			double x1 = rock1->GetX() + ROCK_SIZE / 2;
+			double y1 = rock1->GetY() + ROCK_SIZE / 2;
+
+			double x2 = rock2->GetX() + ROCK_SIZE / 2;
+			double y2 = rock2->GetY() + ROCK_SIZE / 2;
+
+			double dx = x1 - x2;
+			double dy = y1 - y2;
+
+			double dist = sqrt(dx * dx + dy * dy);
+
+			if (dist <= ROCK_SIZE)
+			{
+				rock1->Move(dx * 0.1, dy * 0.1);
+				rock2->Move(-dx * 0.1, -dy * 0.1);
+			}
 		}
 	}
-	
 }
 
-// rock - pin 충돌 처리
+// pin - rock 충돌 처리
 void pinCollisionCheck() {
 	// 핀과 운석, 운석과 운석 충돌 처리
-	for (auto& rock : rocks) {
-		for (auto& p : pinPos) {
+	for (auto rock : rocks)
+	{
+		for (auto& p : pinPos)
+		{
+			double rockCenterX = rock->GetX() + ROCK_SIZE / 2;
+			double rockCenterY = rock->GetY() + ROCK_SIZE / 2;
 
+
+			double dx = rockCenterX - p.getMidX();
+			double dy = rockCenterY - p.getMidY();
+
+			double dist = sqrt(dx * dx + dy * dy);
+
+/*			if (dist <= ROCK_SIZE / 2 + 6)
+			{
+				//-(rand() % 5 + 6)
+				if (rock->GetX() < p.getMidX()) {
+					rock->Move(-(rand() % 10), -20);	// -3 ~ -5
+					break;
+				}
+				else if (rock->GetX() > p.getMidX()) {
+					rock->Move(rand() % 10, -20);	//  3 ~ 5
+					break;
+				}
+				else if (rock->GetX() == p.getMidX()) {
+					rock->Move(rand() % 5 - 2, -20);	// -2 ~ 2
+					break;
+				}
+					
+			}*/
+			if (dist <= ROCK_SIZE / 2 + 6)
+			{
+				double nx = dx / dist;
+				double ny = dy / dist;
+
+				rock->Move(nx * 5, ny * 5);
+			}
 		}
 	}
+}
+
+
+
+/*wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
+	TextOut(mDC, rectView.left + 245, rectView.top + 15, str, lstrlen(str));*/
+	// wchar_t str[64];
+
+void MoneyBoxDraw(HDC hDC) {
+	HFONT hFont = CreateFont(
+		20,     // 높이(글자 크기)
+		0,      // 너비
+		0, 0,
+		FW_BOLD,    // 굵기
+		FALSE, FALSE, FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY,
+		DEFAULT_PITCH | FF_DONTCARE,
+		L"맑은 고딕"
+	);
+
+	HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
+	// 구역 그리기	(구역 배수 표시 예정)
+
+
+	wsprintf(plinkoStr, L"Money : %d", userCash);
+	int num = wcslen(plinkoStr);
+	DrawText(hDC, plinkoStr, num, &MoneyBox, DT_RIGHT | DT_TOP);
+
+	SelectObject(hDC, oldFont);
+	DeleteObject(hFont);
 }
 
 void plinkoDraw(HDC hDC) {
-	// 구역 그리기
-	Rectangle(hDC, plinkoBox.left, plinkoBox.top, plinkoBox.right, plinkoBox.bottom);	
+
 	MoveToEx(hDC, 0, GOAL_LINE, NULL);
 	LineTo(hDC, plinkoBox.right, GOAL_LINE);
 	for (int i = 0; i < 3; i++) {
@@ -262,11 +353,27 @@ void plinkoDraw(HDC hDC) {
 
 void rocksDraw(HDC hDC) {
 	for (auto rock : rocks) {
+		HBRUSH brush;
+
+		if (rock->p_type == 0) {
+			brush = CreateSolidBrush(RGB(0, 0, 0));
+		}
+		else if (rock->p_type == 1) {
+			brush = CreateSolidBrush(RGB(255, 0, 0));
+		}
+		else {
+			brush = CreateSolidBrush(RGB(255, 255, 0));
+		}
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hDC, brush);
+
 		Ellipse(hDC, (int)rock->GetX(), (int)rock->GetY(), (int)rock->GetX() + ROCK_SIZE, (int)rock->GetY() + ROCK_SIZE);
+		
+		SelectObject(hDC, oldBrush);
+		DeleteObject(brush);
 	}
 }
 
-void rockUpdate() {
+void rockUpdate() {		// 운석 내려감
 	for (auto rock : rocks)
 	{
 		rock->Move(0, 5);
