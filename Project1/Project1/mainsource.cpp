@@ -319,10 +319,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					my > enforce[i].Get_Enforce_Point_y() - enforce_size && my < enforce[i].Get_Enforce_Point_y() + enforce_size &&
 					enforce[i].Get_Enforce_Draw() == 1 && enforce[i].Get_Enforce_Open() == 0) {
 					// 가격 관련 조건, 마이너스 필요
-					if (false) {
+					if (GetMoney() < enforce[i].Get_Enforce_Price()) {
 						Play_Sound(L"EFFECT_FEnforce");
 					}
 					else {
+						UseMoney(enforce[i].Get_Enforce_Price());
 						Play_Sound(L"EFFECT_Enforce");
 						ck = 1;
 						enforce[i].Set_Open(1);
@@ -389,16 +390,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// 플링코 화면
 		else if (window_scene == 4) {
 
-			// 전투 진입 버튼 클릭
-			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
-				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
-				GameStart(hWnd, rectView, mx, my, window_scene);
-				window_scene = 2;
-				break;
-			}
-
 			// 플링코 진입 버튼
-			else if (mx > rectView.left + 5 && mx < rectView.left + 105 &&
+			if (mx > rectView.left + 5 && mx < rectView.left + 105 &&
 				my > rectView.top + 5 && my < rectView.top + 45) {
 				window_scene = 4;
 				break;

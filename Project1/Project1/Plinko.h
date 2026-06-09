@@ -35,6 +35,9 @@ void checkGoal();
 void plinkoDraw(HDC hDC);
 void MoneyBoxDraw(HDC hDC);	// 돈 표시
 
+int GetMoney(); // 가진 돈의 양을 리턴 합니다
+void UseMoney(int); // 해당 수치만큼 돈을 사용합니다
+
 void plinkoInit(HWND hWnd);
 void plinkoSpawn(const MinRock& rock, int type);	// 벡터에 rock 넣기
 
