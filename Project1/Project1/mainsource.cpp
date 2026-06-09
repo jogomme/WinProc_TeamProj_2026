@@ -136,7 +136,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hDC, mDC, imgDC; // hDC - 최종 출력 화면 / mDC - 더블 퍼버링용. 대부분의 그림 출력은 여기에 / imgDC - 그림 선택할 때 사용.
 	HBITMAP hBitmap; // 비트맵
-	static HBITMAP imgBitmap[15]; // 이미지 로딩
+	static HBITMAP imgBitmap[50]; // 이미지 로딩
 	static BITMAP imgBmp; // 이미지 크기 잡는용, 배경 잡는용으로 썼는데, 배열로 바꿔서 써도 될듯
 	static HPEN hPen[10], oldPen;
 	static HBRUSH hBrush[10], oldBrush;
@@ -162,12 +162,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 	case WM_CREATE:
 		srand(time(NULL));
-		/*
 		imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP1));
 		imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP2));
 		imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP3));
-		GetObject(imgBitmap[0], sizeof(BITMAP), &imgBmp);
-		*/
+		imgBitmap[3] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP4));
+		imgBitmap[4] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP5));
+		GetObject(imgBitmap[0], sizeof(BITMAP), &imgBmp); // 배경 사이즈
 
 		GetClientRect(hWnd, &rectView);
 		rectViewMid.x = (rectView.left + rectView.right) / 2;
@@ -542,7 +542,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		// 전투 화면
 		else if (window_scene == 2) {
-			
+			// 배경
+			SelectObject(imgDC, imgBitmap[0]);
+			StretchBlt(mDC, 0, 0, rectView.right, rectView.bottom, imgDC, 0, 0, imgBmp.bmWidth, imgBmp.bmHeight, SRCCOPY);
+
 			Draw(mDC, hWnd, rectView, hBrush, hFont);
 
 			// 강제 사망 (임시)
