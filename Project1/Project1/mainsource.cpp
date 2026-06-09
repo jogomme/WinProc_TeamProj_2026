@@ -126,6 +126,7 @@ const int GoConsumeFual{ 3 };
 const int GoShow{ -1 };
 const int SetAttackType{ 4 };
 const int GoRarityShuffle{ 5 };
+const int PlinkoTimer{ 6 };
 
 // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
 int window_scene{0};
@@ -625,13 +626,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		else if (window_scene == 4) {
+			
 			if (plinkoEmptyCheck() && plinkoStart) {
 
 				PlinkoRestart();
 				PlinkoRock::plinkoNumInit();
 				plinkoStart = FALSE;
 
-				SetTimer(hWnd, 4, 1, NULL);	//  플랑코 타이머 시작
+				SetTimer(hWnd, PlinkoTimer, 1, (TIMERPROC)TimerProc);
 			}
 
 			plinkoInit(hWnd);
@@ -689,14 +691,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		switch (wParam) {
 		case 1:
 			//player.Move(xPos, yPos);
-			break;
-		case 4:
-
-			pinCollisionCheck();	// pin - rock
-			rockCollisionCheck();	// rock - rock
-			rockUpdate();
-			checkGoal();
-			pTimerCheck(hWnd);	// 플랑코 타이머 죽이기
 			break;
 		}
 
@@ -829,6 +823,16 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
 		}
 		// 100ms마다 화면을 무효화하여 새로운 레어도 텍스트를 그리게 함
+	}
+	else if (idEvent == PlinkoTimer) {
+		pinCollisionCheck();	// pin - rock
+		rockCollisionCheck();	// rock - rock
+		rockUpdate();
+		checkGoal();
+		if (pTimerCheck() == true) {
+			KillTimer(hWnd, PlinkoTimer);
+		}
+		
 	}
 
 	ReleaseDC(hWnd, hDC);

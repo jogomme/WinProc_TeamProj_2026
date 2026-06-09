@@ -13,7 +13,6 @@ extern int plinkoRockSum;	// 운석 남은 갯수 확인
 
 extern int userCash;	// 유저 보유 머니
 
-
 // 플랑코 시스템 클래스
 class PlinkoRock : public GameObject
 {
@@ -42,7 +41,7 @@ void plinkoSpawn(const MinRock& rock, int type);	// 벡터에 rock 넣기
 void rocksDraw(HDC hDC);
 void rockUpdate();
 
-void pTimerCheck(HWND hWnd);
+bool pTimerCheck();
 
 // 물리 함수
 void rockCollisionCheck();

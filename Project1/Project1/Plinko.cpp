@@ -61,7 +61,7 @@ PlinkoRock::PlinkoRock(const MinRock& rock, int type) {
 	p_price = rock.Price;
 	// p_type = rock.Num;
 	p_type = type;
-	m_x = rand() % (plinkoBox.right - 300) + 150;
+	m_x = rand() % (plinkoBox.right - 400) + 200;
 	m_y = 50;
 
 	m_speed = (rand() % 5 + 5) * 0.1;
@@ -114,6 +114,7 @@ int PlinkoRock::sumPrice(int totalPrice, int addPrice) {
 }
 
 goal goalBox[4];
+RECT zoneTextBox[4];
 void plinkoInit(HWND hWnd) {	// 초기화
 	
 	pinPos.clear();
@@ -126,6 +127,12 @@ void plinkoInit(HWND hWnd) {	// 초기화
 	goalBox[1] = { (plinkoBox.right / 4) * 1, (plinkoBox.right / 4) * 2 };
 	goalBox[2] = { (plinkoBox.right / 4) * 2, (plinkoBox.right / 4) * 3 };
 	goalBox[3] = { (plinkoBox.right / 4) * 3, plinkoBox.right };
+
+	//박스안에 텍스트 상자 범위
+	zoneTextBox[0] = { (plinkoBox.right / 4) * 0, GOAL_LINE, (plinkoBox.right / 4) * 1, plinkoBox.bottom };
+	zoneTextBox[1] = { (plinkoBox.right / 4) * 1, GOAL_LINE, (plinkoBox.right / 4) * 2, plinkoBox.bottom };
+	zoneTextBox[2] = { (plinkoBox.right / 4) * 2, GOAL_LINE, (plinkoBox.right / 4) * 3, plinkoBox.bottom };
+	zoneTextBox[3] = { (plinkoBox.right / 4) * 3, GOAL_LINE, plinkoBox.right, plinkoBox.bottom };
 
 	// 핀 좌표 설정
 	int width = plinkoBox.right;
@@ -275,23 +282,6 @@ void pinCollisionCheck() {
 
 			double dist = sqrt(dx * dx + dy * dy);
 
-/*			if (dist <= ROCK_SIZE / 2 + 6)
-			{
-				//-(rand() % 5 + 6)
-				if (rock->GetX() < p.getMidX()) {
-					rock->Move(-(rand() % 10), -20);	// -3 ~ -5
-					break;
-				}
-				else if (rock->GetX() > p.getMidX()) {
-					rock->Move(rand() % 10, -20);	//  3 ~ 5
-					break;
-				}
-				else if (rock->GetX() == p.getMidX()) {
-					rock->Move(rand() % 5 - 2, -20);	// -2 ~ 2
-					break;
-				}
-					
-			}*/
 			if (dist <= ROCK_SIZE / 2 + 6)
 			{
 				double nx = dx / dist;
@@ -302,12 +292,6 @@ void pinCollisionCheck() {
 		}
 	}
 }
-
-
-
-/*wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
-	TextOut(mDC, rectView.left + 245, rectView.top + 15, str, lstrlen(str));*/
-	// wchar_t str[64];
 
 void MoneyBoxDraw(HDC hDC) {
 	HFONT hFont = CreateFont(
@@ -325,8 +309,6 @@ void MoneyBoxDraw(HDC hDC) {
 	);
 
 	HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
-	// 구역 그리기	(구역 배수 표시 예정)
-
 
 	wsprintf(plinkoStr, L"Money : %d", userCash);
 	int num = wcslen(plinkoStr);
@@ -337,6 +319,49 @@ void MoneyBoxDraw(HDC hDC) {
 }
 
 void plinkoDraw(HDC hDC) {
+	HFONT hFont = CreateFont(
+		20,     // 높이(글자 크기)
+		0,      // 너비
+		0, 0,
+		FW_BOLD,    // 굵기
+		FALSE, FALSE, FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY,
+		DEFAULT_PITCH | FF_DONTCARE,
+		L"맑은 고딕"
+	);
+
+	HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
+
+	COLORREF oldColor = GetTextColor(hDC);
+	COLORREF textColor;
+
+	for (int i = 0; i < 4; i++) {
+		if (zonePrice[i] == 1) {
+			textColor = RGB(30, 30, 30);
+		}
+		else if (zonePrice[i] == 2) {
+			textColor = RGB(46, 204, 113);
+		}
+		else if (zonePrice[i] == 3) {
+			textColor = RGB(241, 196, 15);
+		}
+		else {
+			textColor = RGB(231, 76, 60);
+		}
+		SetTextColor(hDC, textColor);
+		SetBkMode(hDC, TRANSPARENT);
+
+		wsprintf(plinkoStr, L"X %d", zonePrice[i]);
+		int num = wcslen(plinkoStr);
+		
+		DrawText(hDC, plinkoStr, num, &zoneTextBox[i], DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	}
+	SetTextColor(hDC, oldColor);
+	SelectObject(hDC, oldFont);
+	DeleteObject(hFont);
 
 	MoveToEx(hDC, 0, GOAL_LINE, NULL);
 	LineTo(hDC, plinkoBox.right, GOAL_LINE);
@@ -380,8 +405,9 @@ void rockUpdate() {		// 운석 내려감
 	}
 }
 
-void pTimerCheck(HWND hWnd) {	// 운석 위치 업데이트 타이머 삭제
+bool pTimerCheck() {	// 운석 위치 업데이트 타이머 삭제
 	if (rocks.empty()) {
-		KillTimer(hWnd, 4);
+		return true;
 	}
+	else false;
 }
