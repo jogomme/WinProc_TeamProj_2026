@@ -71,7 +71,7 @@ PlinkoRock::~PlinkoRock() {
 	
 }
 void PlinkoRock::plinkoNumInit() {	// 돌 갯수 초기화 > 플랑코 재진입 시 시행
-	m_rock[0].Num = 99;
+	m_rock[0].Num = 0;
 	m_rock[1].Num = 0;
 	m_rock[2].Num = 0;
 }

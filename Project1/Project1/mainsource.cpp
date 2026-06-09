@@ -468,6 +468,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		// 강화 화면
 		else if (window_scene == 1) {
+			MoneyBoxDraw(mDC);
 			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
 
 			for (int i = 0; i < MAX_ENFORCE; i++) {
