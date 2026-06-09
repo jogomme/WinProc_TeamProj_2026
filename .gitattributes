@@ -8,7 +8,7 @@
 *.inl text eol=crlf
 
 # 3. Windows 데스크톱/Win32 API 전용 파일
-*.rc text eol=crlf
+*.rc binary
 resource.h text eol=crlf
 *.manifest text eol=crlf
 
