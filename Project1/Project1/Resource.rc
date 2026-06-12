@@ -1,12 +1,13 @@
-﻿// Microsoft Visual C++ generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
+#pragma code_page(65001)
+
 #include "resource.h"
 #include <winres.h>
-
 /////////////////////////////////////////////////////////////////////////////
 // 한국어(대한민국) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARGET_KOR)
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
 
 #ifdef APSTUDIO_INVOKED
@@ -15,20 +16,20 @@ LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
-"resource.h\0"
+    "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
-"\0"
+    "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
-"\r\n"
-"\0"
+    "\r\n"
+    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -49,6 +50,34 @@ IDB_BITMAP4             BITMAP                  "Image\\backimage\\space4.bmp"
 
 IDB_BITMAP5             BITMAP                  "Image\\backimage\\space5.bmp"
 
+IDB_BITMAP6             BITMAP                  "Image\\enforce\\attack.bmp"
+
+IDB_BITMAP7             BITMAP                  "Image\\enforce\\attack_speed.bmp"
+
+IDB_BITMAP8             BITMAP                  "Image\\enforce\\fuel.bmp"
+
+IDB_BITMAP9             BITMAP                  "Image\\enforce\\speed.bmp"
+
+IDB_BITMAP10            BITMAP                  "Image\\enforce\\type1.bmp"
+
+IDB_BITMAP11            BITMAP                  "Image\\enforce\\type2.bmp"
+
+IDB_BITMAP12            BITMAP                  "Image\\enforce\\type3.bmp"
+
+IDB_BITMAP13            BITMAP                  "Image\\Button\\Done_Button.bmp"
+
+IDB_BITMAP14            BITMAP                  "Image\\Button\\Enforce.bmp"
+
+IDB_BITMAP15            BITMAP                  "Image\\Button\\Fight.bmp"
+
+IDB_BITMAP16            BITMAP                  "Image\\Button\\Plinko.bmp"
+
+IDB_BITMAP17            BITMAP                  "Image\\Button\\Return.bmp"
+
+IDB_BITMAP18            BITMAP                  "Image\\Button\\Setting_Button.bmp"
+
+IDB_BITMAP19            BITMAP                  "Image\\Button\\Start_Button.bmp"
+
 #endif    // 한국어(대한민국) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -63,3 +92,4 @@ IDB_BITMAP5             BITMAP                  "Image\\backimage\\space5.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+

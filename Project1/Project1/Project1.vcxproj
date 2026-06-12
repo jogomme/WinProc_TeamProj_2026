@@ -180,6 +180,20 @@
     <Image Include="Image\backimage\space3.bmp" />
     <Image Include="Image\backimage\space4.bmp" />
     <Image Include="Image\backimage\space5.bmp" />
+    <Image Include="Image\Button\Done_Button.bmp" />
+    <Image Include="Image\Button\Enforce.bmp" />
+    <Image Include="Image\Button\Fight.bmp" />
+    <Image Include="Image\Button\Plinko.bmp" />
+    <Image Include="Image\Button\Return.bmp" />
+    <Image Include="Image\Button\Setting_Button.bmp" />
+    <Image Include="Image\Button\Start_Button.bmp" />
+    <Image Include="Image\enforce\attack.bmp" />
+    <Image Include="Image\enforce\attack_speed.bmp" />
+    <Image Include="Image\enforce\fuel.bmp" />
+    <Image Include="Image\enforce\speed.bmp" />
+    <Image Include="Image\enforce\type1.bmp" />
+    <Image Include="Image\enforce\type2.bmp" />
+    <Image Include="Image\enforce\type3.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

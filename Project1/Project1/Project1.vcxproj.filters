@@ -99,5 +99,47 @@
     <Image Include="Image\backimage\space5.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="Image\enforce\attack.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\enforce\attack_speed.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\enforce\fuel.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\enforce\speed.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\enforce\type1.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\enforce\type2.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\enforce\type3.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Done_Button.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Enforce.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Fight.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Plinko.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Return.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Setting_Button.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\Button\Start_Button.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

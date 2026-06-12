@@ -164,12 +164,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 	case WM_CREATE:
 		srand(time(NULL));
+		// 배경
 		imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP1));
 		imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP2));
 		imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP3));
 		imgBitmap[3] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP4));
 		imgBitmap[4] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP5));
 		GetObject(imgBitmap[0], sizeof(BITMAP), &imgBmp); // 배경 사이즈
+
+		// 강화 이미지
+		imgBitmap[5] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP6)); // attack
+		imgBitmap[6] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP9)); // speed
+		imgBitmap[7] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP8)); // fuel
+		imgBitmap[8] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP7)); // attack_speed
+		imgBitmap[9] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP10)); // type1
+		imgBitmap[10] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP11)); // type2 
+		imgBitmap[11] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP12)); // type3
+
+		// 버튼 이미지
+		imgBitmap[12] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP13)); // Done
+		imgBitmap[13] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP14)); // Enforce
+		imgBitmap[14] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP15)); // Go Fight
+		imgBitmap[15] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP16)); // Plinko
+		imgBitmap[16] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP17)); // Return Enforce
+		imgBitmap[17] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP18)); // Setting
+		imgBitmap[18] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP19)); // Game Start
 
 		GetClientRect(hWnd, &rectView);
 		rectViewMid.x = (rectView.left + rectView.right) / 2;
@@ -266,12 +285,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		// 메인 화면
 		if (window_scene == 0) {
-			if (mx > rectViewMid.x - 100 && mx< rectViewMid.x + 100 &&
-				my>rectViewMid.y - 20 && my < rectViewMid.y + 20) {
+			if (mx > rectViewMid.x - 70 && mx< rectViewMid.x + 70 &&
+				my>rectViewMid.y - 50 && my < rectViewMid.y + 20) {
 				GameStart(hWnd, rectView, mx, my, window_scene);
 			}
-			else if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
-				my>rectViewMid.y + 30 && my < rectViewMid.y + 70) {
+			else if (mx > rectViewMid.x - 70 && mx < rectViewMid.x + 70 &&
+				my>rectViewMid.y + 30 && my < rectViewMid.y + 100) {
 
 				return_setting = window_scene;
 				window_scene = 3;
@@ -353,6 +372,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						else if (enforce[i].Get_Enforce_Type() == 4) {
 							player.SetAttackSpeed(amount);
 						}
+						else if (enforce[i].Get_Enforce_Type() == 5) {
+							// 무기상자 - 속도업 해금
+						}
 					}
 				}
 			}
@@ -372,8 +394,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				GameOver(hWnd);
 			}
 			if (isGaming == false) {
-				if ((mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
-					my > rectViewMid.y - 30 && my < rectViewMid.y + 30)) {
+				if ((mx > rectViewMid.x - 70 && mx < rectViewMid.x + 70 &&
+					my > rectViewMid.y - 50 && my < rectViewMid.y + 20)) {
 					window_scene = 1;
 					Stop_BGM();
 					Play_Sound_BGM(L"BGM_Lobby");
@@ -382,8 +404,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		// 설정 화면
 		else if (window_scene == 3) {
-			if (mx > rectViewMid.x - 100 && mx < rectViewMid.x + 100 &&
-				my > rectViewMid.y + 80 && my < rectViewMid.y + 120) {
+			if (mx > rectViewMid.x - 50 && mx < rectViewMid.x + 50 &&
+				my > rectViewMid.y + 90 && my < rectViewMid.y + 140) {
 				window_scene = return_setting;
 			}
 		}
@@ -460,22 +482,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		oldPen = (HPEN)SelectObject(mDC, hPen[0]);
 		// 게임 시작 화면
 		if (window_scene == 0) {
+			// 배경
+			SelectObject(imgDC, imgBitmap[0]);
+			StretchBlt(mDC, 0, 0, rectView.right, rectView.bottom, imgDC, 0, 0, imgBmp.bmWidth, imgBmp.bmHeight, SRCCOPY);
 
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
-			//시작 버튼
-			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 20, rectViewMid.x + 100, rectViewMid.y + 20);
+			// start
+			SelectObject(imgDC, imgBitmap[18]);
+			TransparentBlt(mDC, rectViewMid.x - 70, rectViewMid.y - 50, 140, 70, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
-			oldFont = (HFONT)SelectObject(mDC, hFont);
-			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
-			wchar_t str[64];
-			wsprintf(str, L"Game Start"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectViewMid.x - 50, rectViewMid.y - 10, str, lstrlen(str));
-
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
-			//설정 버튼
-			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 30, rectViewMid.x + 100, rectViewMid.y + 70);
-			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectViewMid.x - 40, rectViewMid.y + 40, str, lstrlen(str));
+			// setting
+			SelectObject(imgDC, imgBitmap[17]);
+			TransparentBlt(mDC, rectViewMid.x - 70, rectViewMid.y + 30, 140, 70, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 		}
 		// 강화 화면
 		else if (window_scene == 1) {
@@ -484,7 +501,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			for (int i = 0; i < MAX_ENFORCE; i++) {
 				// 블럭 오픈 여부에 따른 색
-				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[8 - enforce[i].Get_Enforce_Open()]);
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7 - enforce[i].Get_Enforce_Open() * 3]);
 				// 블럭 그리기
 				if (enforce[i].Get_Enforce_Draw() == 1) {
 					// 타입에 따른 이미지
@@ -492,6 +509,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					double y = enforce[i].Get_Enforce_Point_y();
 					Rectangle(mDC, x - enforce_size, y - enforce_size, x + enforce_size, y + enforce_size);
 
+					if (enforce[i].Get_Enforce_Type()) {
+						SelectObject(imgDC, imgBitmap[4 + enforce[i].Get_Enforce_Type()]);
+						TransparentBlt(mDC, x - enforce_size, y - enforce_size, enforce_size * 2, enforce_size * 2, imgDC, 0, 0, 400, 400, RGB(255, 255, 255));
+					}
 					oldFont = (HFONT)SelectObject(mDC, hFont);
 					SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 					wchar_t str[64];
@@ -509,6 +530,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					else if (enforce[i].Get_Enforce_Type() == 4) {
 						wsprintf(str, L"공격속도");
 					}
+					else if (enforce[i].Get_Enforce_Type() == 5) {
+						wsprintf(str, L"속도업 해금");
+					}
 					else {
 						wsprintf(str, L"미구현");
 					}
@@ -521,36 +545,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 
 			// 전투 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
-			Rectangle(mDC, rectView.left + 5, rectView.bottom - 85, rectView.left + 205, rectView.bottom - 5);
-
-			oldFont = (HFONT)SelectObject(mDC, hFont);
-			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
-
-			wchar_t str[64];
-			wsprintf(str, L"Go Fight"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 65, rectView.bottom - 55, str, lstrlen(str));
+			// Go Fight
+			SelectObject(imgDC, imgBitmap[14]);
+			TransparentBlt(mDC, rectView.left + 5, rectView.bottom - 85, 200, 80, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
 			// 플링코 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[6]);
-			Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 105, rectView.top + 45);
-
-			wsprintf(str, L"Plinko"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 25, rectView.top + 15, str, lstrlen(str));
+			// Plinko
+			SelectObject(imgDC, imgBitmap[15]);
+			TransparentBlt(mDC, rectView.left + 5, rectView.top + 5, 100, 40, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
 			// 강화 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
-			Rectangle(mDC, rectView.left + 115, rectView.top + 5, rectView.left + 215, rectView.top + 45);
-
-			wsprintf(str, L"Enforce"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 135, rectView.top + 15, str, lstrlen(str));
+			// Enforce
+			SelectObject(imgDC, imgBitmap[13]);
+			TransparentBlt(mDC, rectView.left + 115, rectView.top + 5, 100, 40, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
 			// 설정 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
-			Rectangle(mDC, rectView.left + 225, rectView.top + 5, rectView.left + 325, rectView.top + 45);
+			// Setting
+			SelectObject(imgDC, imgBitmap[17]);
+			TransparentBlt(mDC, rectView.left + 225, rectView.top + 5, 100, 40, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
-			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 245, rectView.top + 15, str, lstrlen(str));
 		}
 		// 전투 화면
 		else if (window_scene == 2) {
@@ -591,31 +604,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 사망시 게임 오버 버튼
 			{
 				if (isGaming == false) {
-					oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
-					Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y - 30, rectViewMid.x + 100, rectViewMid.y + 30);
+					// Return Enforce
+					SelectObject(imgDC, imgBitmap[16]);
+					TransparentBlt(mDC, rectViewMid.x - 70, rectViewMid.y - 50, 140, 70, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
 					oldFont = (HFONT)SelectObject(mDC, hFont);
 					SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 					wchar_t str[64];
 					wsprintf(str, L"Game Over");
-					TextOut(mDC, rectViewMid.x - 60, rectViewMid.y - 60, str, lstrlen(str));
-
-					wsprintf(str, L"Go Enforce Page");
-					TextOut(mDC, rectViewMid.x - 80, rectViewMid.y - 10, str, lstrlen(str));
+					TextOut(mDC, rectViewMid.x - 60, rectViewMid.y - 50, str, lstrlen(str));
 				}
 			}
 		}
 		// 설정 화면
 		else if (window_scene == 3) {
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
-			Rectangle(mDC, rectViewMid.x - 100, rectViewMid.y + 80, rectViewMid.x + 100, rectViewMid.y + 120);
-
-			oldFont = (HFONT)SelectObject(mDC, hFont);
-			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
-
-			wchar_t str[64];
-			wsprintf(str, L"Go Back"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectViewMid.x - 50, rectViewMid.y + 90, str, lstrlen(str));
+			// 배경
+			SelectObject(imgDC, imgBitmap[0]);
+			StretchBlt(mDC, 0, 0, rectView.right, rectView.bottom, imgDC, 0, 0, imgBmp.bmWidth, imgBmp.bmHeight, SRCCOPY);
+			
+			// Done
+			SelectObject(imgDC, imgBitmap[12]);
+			TransparentBlt(mDC, rectViewMid.x - 50, rectViewMid.y + 90, 100, 50, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 		}
 
 		else if (window_scene == 4) {
@@ -638,27 +647,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			oldFont = (HFONT)SelectObject(mDC, hFont);
 			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 
-			wchar_t str[64];
-			// 플링코 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[6]);
-			Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 105, rectView.top + 45);
 
-			wsprintf(str, L"Plinko"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 25, rectView.top + 15, str, lstrlen(str));
+			// 플링코 화면 진입 버튼
+			// Plinko
+			SelectObject(imgDC, imgBitmap[15]);
+			TransparentBlt(mDC, rectView.left + 5, rectView.top + 5, 100, 40, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
 			// 강화 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[2]);
-			Rectangle(mDC, rectView.left + 115, rectView.top + 5, rectView.left + 215, rectView.top + 45);
-
-			wsprintf(str, L"Enforce"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 135, rectView.top + 15, str, lstrlen(str));
+			// Enforce
+			SelectObject(imgDC, imgBitmap[13]);
+			TransparentBlt(mDC, rectView.left + 115, rectView.top + 5, 100, 40, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 
 			// 설정 화면 진입 버튼
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush[4]);
-			Rectangle(mDC, rectView.left + 225, rectView.top + 5, rectView.left + 325, rectView.top + 45);
-
-			wsprintf(str, L"Setting"); // 추후 이미지 버튼 등으로 변경 예정
-			TextOut(mDC, rectView.left + 245, rectView.top + 15, str, lstrlen(str));
+			// Setting
+			SelectObject(imgDC, imgBitmap[17]);
+			TransparentBlt(mDC, rectView.left + 225, rectView.top + 5, 100, 40, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 		}
 
 		SelectObject(mDC, oldBrush);
