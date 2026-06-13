@@ -61,6 +61,8 @@ public:
 
 	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 
+	void HealPlayer(double);
+
 private:
 	// 0 - 기본 무기, 1 - 체인건
 	int attackType;

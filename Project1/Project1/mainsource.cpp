@@ -131,6 +131,10 @@ const int PlinkoTimer{ 6 };
 // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
 int window_scene{0};
 
+// 스테이지 이동시 회복할 확률
+int heal_percent{ 0 };
+double attack_heal{ 0 };
+
 //-----------------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 //-----------------------------------------------------------------------------------------------
@@ -178,8 +182,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		imgBitmap[7] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP8)); // fuel
 		imgBitmap[8] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP7)); // attack_speed
 		imgBitmap[9] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP10)); // type1
-		imgBitmap[10] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP11)); // type2 
-		imgBitmap[11] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP12)); // type3
+		imgBitmap[10] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP12)); // type3
+		imgBitmap[11] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP11)); // type2
 
 		// 버튼 이미지
 		imgBitmap[12] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP13)); // Done
@@ -247,12 +251,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			for (int i = 1; i <= timercnt; i++) {
 				KillTimer(hWnd, i);
 			}
-
 			Stop_BGM();
 			Quit_SoundAll();
 			PostQuitMessage(0);
 			return 0;
 		}
+
 		else if (wParam == VK_SPACE) {
 			if (gMap.isfull()) {
 				isDowning++;
@@ -266,6 +270,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					SetTimer(hWnd, GoRarityShuffle, 100, (TIMERPROC)TimerProc); // 100ms마다 갱신
 					isDowning = 0; // 스페이스바 게이지 초기화
 					GameSleep(hWnd);
+
+					int rand_temp = rand() % 100 + 1;
+					if (rand_temp <= heal_percent) {
+						player.HealPlayer(player.GetMaxFual());
+					}
 				}
 			}
 		}
@@ -299,7 +308,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		// 강화 화면
 		else if (window_scene == 1) {
-
+			UseMoney(-5);
 			// 전투 진입 버튼 클릭
 			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
 				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
@@ -377,6 +386,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 							for (int i = 0; i < MAX_ROCKS; i++) {
 								rock[i].UnlockRockType(3);
 							}
+						}
+						else if (enforce[i].Get_Enforce_Type() == 6) {
+							heal_percent += enforce[i].Get_Enforce_Amount();
+						}
+						else if (enforce[i].Get_Enforce_Type() == 7) {
+							attack_heal += enforce[i].Get_Enforce_Amount();
 						}
 					}
 				}
@@ -535,6 +550,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					}
 					else if (enforce[i].Get_Enforce_Type() == 5) {
 						wsprintf(str, L"속도업 해금");
+					}
+					else if (enforce[i].Get_Enforce_Type() == 6) {
+						wsprintf(str, L"스테이지 회복 확률");
+					}
+					else if (enforce[i].Get_Enforce_Type() == 7) {
+						wsprintf(str, L"공격시 연료 회복");
 					}
 					else {
 						wsprintf(str, L"미구현");
@@ -792,6 +813,8 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 				}
 			}
 		}
+
+		player.HealPlayer(attack_heal / 10);
 	}
 	//--------------------------------------------------------------------
 	//  연료 소비 관련 타이머
@@ -836,14 +859,6 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 	ReleaseDC(hWnd, hDC);
 	InvalidateRect(hWnd, NULL, false);
-}
-
-int Enforce_Point_Calc(Point rectViewMid, char c, int xy, int intrv)
-{
-	if (c == 'x')
-		return rectViewMid.x + xy * intrv;
-	else
-		return rectViewMid.y + xy * intrv;
 }
 
 void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)

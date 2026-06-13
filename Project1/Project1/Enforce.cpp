@@ -120,12 +120,12 @@ void Enforce::Start_Setting(Enforce& ef, int cnt)
 	}
 	else if (cnt == 5) {
 		ef.Set_Pos(3, 1);
-		ef.Set_TAP(0, 0, 1);
+		ef.Set_TAP(7, 5, 1);
 		ef.Set_Drawing(-1, -1, -1);
 	}
 	else if (cnt == 6) {
 		ef.Set_Pos(4, -1);
-		ef.Set_TAP(0, 0, 1);
+		ef.Set_TAP(6, 10, 1);
 		ef.Set_Drawing(-1, -1, -1);
 	}
 	else if (cnt == 7) {

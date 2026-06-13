@@ -133,7 +133,7 @@ void Rock::Die()
 	int feedCount = (rand() % 3) + (GetStage() / 2) + 1;
 
 	if (m_RockType == 3) {
-		feedCount == 1;
+		feedCount = 1;
 	}
 
 	for (int f = 0; f < feedCount; f++) {

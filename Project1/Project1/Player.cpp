@@ -261,3 +261,9 @@ void Player::SetAttackTypeChanged(bool b)
 {
 	m_AttackTypeChanged = b;
 }
+
+void Player::HealPlayer(double heal)
+{
+	m_fual += heal;
+	if (m_fual > m_MaxFual) m_fual = m_MaxFual;
+}
