@@ -32,7 +32,7 @@ public:
 	void Move(double x, double y) override; // 완
 
 	// 그리기 함수
-	void Draw(HDC mDC, COLORREF color);
+	void Draw(HDC mDC, HINSTANCE g_hInst);
 
 	// 암석 해금 함수
 	void UnlockRockType(int rockType); // 완
@@ -48,6 +48,8 @@ public:
 	void CheckBoundary(int widths, int heights);
 
 	void Die();
+
+	void SetRockMotion(int);
 
 protected :
 	double direction[2]; // 암석이 이동하는 방향, x, y 좌표이다.
@@ -69,4 +71,5 @@ private:
 	// 지금 암석이 나오는 종류, 4번 인덱스는 무기상자 이다.
 	int m_unlockType[4] = { 1,0,0,0 }; 
 
+	int m_motion;
 };

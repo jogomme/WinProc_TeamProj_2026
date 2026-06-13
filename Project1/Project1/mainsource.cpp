@@ -127,6 +127,7 @@ const int GoShow{ -1 };
 const int SetAttackType{ 4 };
 const int GoRarityShuffle{ 5 };
 const int PlinkoTimer{ 6 };
+const int StoneTimer{ 7 };
 
 // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
 int window_scene{0};
@@ -271,6 +272,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		Play_Sound_BGM(L"BGM_Lobby");
 
+		SetTimer(hWnd, StoneTimer, 50, (TIMERPROC)TimerProc);
 		break;
 
 	case WM_COMMAND:
@@ -922,6 +924,13 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 		
 	}
 
+	// 돌 애니매이션
+	else if (idEvent == StoneTimer) {
+		for (int i = 0; i < MAX_ROCKS; i++) {
+			rock[i].SetRockMotion(1);
+		}
+	}
+
 	ReleaseDC(hWnd, hDC);
 	InvalidateRect(hWnd, NULL, false);
 }
@@ -995,7 +1004,7 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	// 운석 Draw
 	for (int i = 0; i < MAX_ROCKS; ++i) {
 		if (rock[i].GetActive()) {
-			rock[i].Draw(mDC, RGB(255, 0, 0));
+			rock[i].Draw(mDC, g_hInst);
 		}
 	}
 
@@ -1008,7 +1017,7 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 
 	for (int i = 0; i < MAX_FEED; ++i) {
 		if (feed[i].GetActive()) {
-			feed[i].Draw(mDC, RGB(0, 255, 0));
+			feed[i].Draw(mDC, g_hInst);
 		}
 	}
 

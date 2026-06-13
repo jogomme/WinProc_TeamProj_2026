@@ -65,10 +65,10 @@ void Bullet::Draw(HDC mDC, int type, HINSTANCE g_hInst)
 	SelectObject(imgDC, imgBitmap);
 
 	if (type == 0) {
-		TransparentBlt(mDC, m_x - m_size * 1.5, m_y - m_size * 1.5, m_size * 1.5, m_size * 1.5, imgDC, 19, 1, 14, 14, RGB(0, 0, 0));
+		TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 19, 1, 14, 14, RGB(0, 0, 0));
 	}
 	else {
-		TransparentBlt(mDC, m_x - m_size * 1.5, m_y - m_size * 1.5, m_size * 1.5, m_size * 1.5, imgDC, 19, 19, 14, 14, RGB(0, 0, 0));
+		TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 19, 19, 14, 14, RGB(0, 0, 0));
 	}
 
 	DeleteDC(imgDC);

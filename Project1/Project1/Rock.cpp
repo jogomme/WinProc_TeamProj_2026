@@ -6,6 +6,7 @@
 #include<random>
 
 #include"Feed.h"
+#include"resource.h"
 
 extern Feed feed[];
 #define MAX_FEEDS 150
@@ -102,6 +103,8 @@ void Rock::Spawn()
 
 	// 암석의 속도 랜덤으로 설정
 	m_speed = speedDist(generate);
+
+	m_motion = 0;
 }
 
 int Rock::GetID() const
@@ -165,7 +168,7 @@ void Rock::Move(double x, double y)
 }
 
 // 그리기 함수
-void Rock::Draw(HDC mDC, COLORREF color)
+void Rock::Draw(HDC mDC, HINSTANCE g_hInst)
 {
 	if (!isActive) return;
 
@@ -176,30 +179,32 @@ void Rock::Draw(HDC mDC, COLORREF color)
 		SelectObject(mDC, oldwhiteBRUSH); 
 		DeleteObject(whiteBRUSH);        
 
-		HBRUSH hpBRUSH = CreateSolidBrush(color);
+		HBRUSH hpBRUSH = CreateSolidBrush(RGB(255, 0, 0));
 		HBRUSH oldhpBRUSH = (HBRUSH)SelectObject(mDC, hpBRUSH);
 		double hpRate = m_hp / max_hp;
 		Rectangle(mDC, m_x - m_size - 10, m_y - m_size - 20, m_x - m_size + (hpRate * 2 * m_size), m_y - m_size);
 		SelectObject(mDC, oldhpBRUSH); 
-		DeleteObject(hpBRUSH);         
+		DeleteObject(hpBRUSH);
 	}
 
-	if (m_RockType == 0) {
-		HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
-		HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
-		Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+	HBITMAP imgBitmap = NULL;
+	if(m_RockType == 0)
+		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP23)); // stone1
+	else if (m_RockType == 1)
+		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP24)); // stone2
+	else if (m_RockType == 2)
+		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP25)); // stone3
+	else if (m_RockType == 3)
+		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP26)); // stone4
 
-		SelectObject(mDC, oldrBRUSH);
-		DeleteObject(rBRUSH);
-	}
-	else if (m_RockType == 3) {
-		HBRUSH rBRUSH = CreateSolidBrush(RGB(0, 255, 0));
-		HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
-		Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+	HDC imgDC;
+	imgDC = CreateCompatibleDC(mDC);
+	SelectObject(imgDC, imgBitmap);
 
-		SelectObject(mDC, oldrBRUSH);
-		DeleteObject(rBRUSH);
-	}
+	TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 0 + 150 * m_motion, 0, 150, 150, RGB(255, 255, 255));
+
+	DeleteDC(imgDC);
+	DeleteObject(imgBitmap);
 }
 
 void Rock::UnlockRockType(int rockType)
@@ -258,4 +263,10 @@ double Rock::GetPrice() const
 int Rock::GetRockType() const
 {
 	return m_RockType;
+}
+
+void Rock::SetRockMotion(int deg)
+{
+	m_motion += deg;
+	if (m_motion > 4) m_motion = 0;
 }
