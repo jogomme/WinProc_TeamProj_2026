@@ -55,3 +55,5 @@ void PlinkoRestart();
 void PlinkoReset();
 
 bool plinkoEmptyCheck();
+
+void SetMoney(int num);

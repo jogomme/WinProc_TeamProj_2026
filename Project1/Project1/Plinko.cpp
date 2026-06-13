@@ -329,6 +329,11 @@ void UseMoney(int num)
 	userCash -= num;
 }
 
+void SetMoney(int num)
+{
+	userCash = num;
+}
+
 void plinkoDraw(HDC hDC) {
 	HFONT hFont = CreateFont(
 		20,     // 높이(글자 크기)

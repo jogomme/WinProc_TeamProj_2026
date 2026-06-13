@@ -20,6 +20,7 @@
 #include "Feed.h"
 #include "Bullet.h"
 #include "sound.h"
+#include "Boss.h"
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"My Window Class";
@@ -80,6 +81,7 @@ void GameOver(HWND hWnd);
 
 void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 void GameSleep(HWND hWnd);
+void CheckBossMerge();
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
@@ -98,6 +100,7 @@ Bullet bullet[MAX_BULLETS];
 GameMap gMap;
 Enforce enforce[MAX_ENFORCE];
 Feed feed[MAX_FEED];
+Boss boss;
 
 // 현재 마우스 커서의 위치
 int xPos{};
@@ -128,9 +131,11 @@ const int SetAttackType{ 4 };
 const int GoRarityShuffle{ 5 };
 const int PlinkoTimer{ 6 };
 const int StoneTimer{ 7 };
+const int GoBossAttack{ 8 };
+
 
 // 현재 어느 화면을 띄울 것인가 // 0 - 메인 화면, 1 - 플레이어 강화 창, 2 - 전투 화면, 3 - 설정 창, 4 - 플링코 화면
-int window_scene{0};
+int window_scene{ 0 };
 
 // 스테이지 이동시 회복할 확률
 int heal_percent{ 0 };
@@ -252,12 +257,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		drag = 0;
 
 
-		hButton1 = CreateWindow(L"button", L"Down", WS_CHILD | BS_PUSHBUTTON, 
+		hButton1 = CreateWindow(L"button", L"Down", WS_CHILD | BS_PUSHBUTTON,
 			rectViewMid.x - 120, rectViewMid.y - 20, 50, 40, hWnd, (HMENU)IDC_BUTTON1, g_hInst, NULL);
-		hButton2 = CreateWindow(L"button", L"Up", WS_CHILD | BS_PUSHBUTTON, 
+		hButton2 = CreateWindow(L"button", L"Up", WS_CHILD | BS_PUSHBUTTON,
 			rectViewMid.x + 70, rectViewMid.y - 20, 50, 40, hWnd, (HMENU)IDC_BUTTON2, g_hInst, NULL);
 
-		hEdit = CreateWindow(L"edit", L"", WS_CHILD | ES_READONLY, 
+		hEdit = CreateWindow(L"edit", L"", WS_CHILD | ES_READONLY,
 			rectViewMid.x - 50, rectViewMid.y - 20, 100, 40, hWnd, (HMENU)IDC_EDIT, g_hInst, NULL);
 
 		{
@@ -319,6 +324,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			Quit_SoundAll();
 			PostQuitMessage(0);
 			return 0;
+		}
+
+		else if (wParam == 'M') {
+			std::cout << "Show Me The Money" << '\n';
+			SetMoney(10000);
+			player.SetFual(10000);
 		}
 
 		else if (wParam == VK_SPACE) {
@@ -560,7 +571,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		InvalidateRect(hWnd, NULL, false);
 		break;
 
-	case WM_PAINT:{
+	case WM_PAINT: {
 		// 기초 로드
 		hDC = BeginPaint(hWnd, &ps);
 		mDC = CreateCompatibleDC(hDC);
@@ -721,14 +732,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 배경
 			SelectObject(imgDC, imgBitmap[0]);
 			StretchBlt(mDC, 0, 0, rectView.right, rectView.bottom, imgDC, 0, 0, imgBmp.bmWidth, imgBmp.bmHeight, SRCCOPY);
-			
+
 			// Done
 			SelectObject(imgDC, imgBitmap[12]);
 			TransparentBlt(mDC, rectViewMid.x - 50, rectViewMid.y + 90, 100, 50, imgDC, 0, 0, 400, 200, RGB(255, 255, 255));
 		}
 
 		else if (window_scene == 4) {
-			
+
 			if (plinkoEmptyCheck() && plinkoStart) {
 
 				PlinkoRestart();
@@ -829,6 +840,8 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			return;
 		}
 
+		CheckBossMerge();
+
 		player.Move(xPos, yPos);
 
 		for (int i = 0; i < gMap.GetMaximumRock(); ++i) {
@@ -855,12 +868,41 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 				feed[i].SetLength(player);
 			}
 		}
+
+		// 플레이어 총알 - 보스 타격 체크 (SetActive 후 GetAttackPower 호출 버그 수정)
+		for (int i = 0; i < MAX_BULLETS; ++i) {
+			if (bullet[i].GetIsActive()) {
+				if (boss.IsActive()) {
+					double dx = boss.GetX() - bullet[i].GetX();
+					double dy = boss.GetY() - bullet[i].GetY();
+					if (sqrt(dx * dx + dy * dy) < boss.GetSize() + 10) {
+						double dmg = bullet[i].GetAttackPower();
+						bullet[i].SetActive(false);
+						bool bossDead = boss.TakeDamage(dmg);
+						if (bossDead) {
+							KillTimer(hWnd, GoBossAttack);
+						}
+					}
+				}
+				if (bullet[i].GetIsActive()) {
+					bullet[i].Move(width, height);
+				}
+			}
+		}
+
+		// 보스 이동 / 탄막 이동 / 플레이어 피격 판정 - 16ms GoMove 안에서 처리
+		// GoBossAttack 타이머는 탄막 발사 패턴만 담당
+		if (boss.IsActive()) {
+			boss.Move(player.GetX(), player.GetY());
+			boss.MoveBullets(width, height);
+			boss.CheckBulletCollision(player);
+		}
 	}
 	//--------------------------------------------------------------------
 	//  공격 관련 타이머
 	//--------------------------------------------------------------------
 	else if (idEvent == GoAttack) {
-		
+
 		if (player.GetAttackTypeChanged()) {
 			SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
 			SetTimer(hWnd, SetAttackType, 16, (TIMERPROC)TimerProc);
@@ -876,7 +918,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 
 					bullet[i].Spawn(player, rock[targetRockID]);
 
-					break; 
+					break;
 				}
 			}
 		}
@@ -921,13 +963,20 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 		if (pTimerCheck() == true) {
 			KillTimer(hWnd, PlinkoTimer);
 		}
-		
+
 	}
 
 	// 돌 애니매이션
 	else if (idEvent == StoneTimer) {
 		for (int i = 0; i < MAX_ROCKS; i++) {
 			rock[i].SetRockMotion(1);
+		}
+	}
+	else if (idEvent == GoBossAttack) {
+		// 탄막 발사 패턴만 담당 (800ms 간격 유지)
+		// 이동/탄막이동/피격판정은 GoMove(16ms)에서 처리
+		if (boss.IsActive()) {
+			boss.FireDanmaku(player);
 		}
 	}
 
@@ -963,7 +1012,7 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 		}
 
 		for (int i = 0; i < MAX_BULLETS; ++i) {
-			bullet[i].SetActive(false); 
+			bullet[i].SetActive(false);
 		}
 
 		for (int i = 0; i < MAX_FEED; ++i) {
@@ -973,6 +1022,9 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 		SetTimer(hWnd, GoMove, 16, (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoAttack, player.GetAttackSpeed(), (TIMERPROC)TimerProc);
 		SetTimer(hWnd, GoConsumeFual, 1000, (TIMERPROC)TimerProc);
+		SetTimer(hWnd, GoBossAttack, 800, (TIMERPROC)TimerProc); // 0.8초마다 탄막 발사
+
+		boss.SetActive(false); // 재시작 시 보스 초기화
 
 		Stop_BGM();
 		Play_Sound_BGM(L"BGM_Fight");
@@ -984,8 +1036,9 @@ void GameOver(HWND hWnd)
 	KillTimer(hWnd, GoMove);
 	KillTimer(hWnd, GoAttack);
 	KillTimer(hWnd, GoConsumeFual);
-	KillTimer(hWnd, SetAttackType);    
+	KillTimer(hWnd, SetAttackType);
 	KillTimer(hWnd, GoRarityShuffle);
+	KillTimer(hWnd, GoBossAttack);
 
 	isGaming = false;
 	player.SetAttackType(0);
@@ -999,6 +1052,11 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 		if (bullet[i].GetIsActive()) {
 			bullet[i].Draw(mDC, player.GetAttackType(), g_hInst);
 		}
+	}
+
+	if (boss.IsActive()) {
+		boss.Draw(mDC);
+		boss.DrawBullets(mDC);
 	}
 
 	// 운석 Draw
@@ -1031,4 +1089,55 @@ void GameSleep(HWND hWnd)
 	KillTimer(hWnd, GoMove);
 	KillTimer(hWnd, GoAttack);
 	KillTimer(hWnd, GoConsumeFual);
+}
+
+void CheckBossMerge()
+{
+	// 2스테이지가 아니거나, 이미 보스가 살아있으면 검사 안 함
+	if (gMap.GetStage() != 2 || boss.IsActive()) return;
+
+	int mergeRadius = 150; // 융합 반경(픽셀)
+	int mergeCondition = 2; // 5개가 모이면 융합
+
+	for (int i = 0; i < MAX_ROCKS; i++) {
+		if (!rock[i].GetActive()) continue;
+
+		int nearbyCount = 0;
+		double centerX = 0, centerY = 0;
+
+		// 현재 운석(i) 기준으로 반경 내의 다른 운석 개수를 센다
+		for (int j = 0; j < MAX_ROCKS; j++) {
+			if (!rock[j].GetActive()) continue;
+
+			double dx = rock[i].GetX() - rock[j].GetX();
+			double dy = rock[i].GetY() - rock[j].GetY();
+			double dist = sqrt(dx * dx + dy * dy);
+
+			if (dist <= mergeRadius) {
+				nearbyCount++;
+				centerX += rock[j].GetX();
+				centerY += rock[j].GetY();
+			}
+		}
+
+		// 조건 만족 시 융합 시작!
+		if (nearbyCount >= mergeCondition) {
+			centerX /= nearbyCount; // 모여있는 놈들의 중심점
+			centerY /= nearbyCount;
+
+			// 모여있던 운석들은 제물로 바쳐짐 (파괴)
+			for (int j = 0; j < MAX_ROCKS; j++) {
+				if (!rock[j].GetActive()) continue;
+				double dx = rock[i].GetX() - rock[j].GetX();
+				double dy = rock[i].GetY() - rock[j].GetY();
+				if (sqrt(dx * dx + dy * dy) <= mergeRadius) {
+					rock[j].SetActive(false);
+				}
+			}
+
+			// 중심점에 보스 스폰!
+			boss.Spawn(centerX, centerY);
+			return; // 한 번 스폰되면 루프 종료
+		}
+	}
 }

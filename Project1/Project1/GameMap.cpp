@@ -113,7 +113,7 @@ void GameMap::DrawNextStage(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont
 {
 	HFONT oldFont = (HFONT)SelectObject(mDC, hFont);
 	SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
-	
+
 	int middleX = (rectView.left + rectView.right) / 2;
 	int middleY = (rectView.top + rectView.bottom) / 2;
 

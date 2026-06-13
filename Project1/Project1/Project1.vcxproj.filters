@@ -45,6 +45,9 @@
     <ClCompile Include="sound.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Boss.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -75,6 +78,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="sound.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -139,6 +145,27 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="Image\Button\Start_Button.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\bullet.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\plinko.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\rocket.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\stone1.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\stone2.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\stone3.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Image\object\stone4.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

@@ -38,12 +38,12 @@ void Feed::Drop(const Rock& r)
 		int randomX = (rand() % 200) - 100;
 		int randomY = (rand() % 200) - 100;
 		setDirection(m_x + randomX, m_y + randomY);
-	} 
+	}
 	else {
 
 	}
 	// 3. 파편의 튀는 속도를 랜덤하게 지정
-	m_speed = ((rand() % 5) + 3)/3;
+	m_speed = ((rand() % 5) + 3) / 3;
 }
 
 void Feed::SetLength(Player& p)
@@ -51,11 +51,21 @@ void Feed::SetLength(Player& p)
 	double dx = m_x - p.GetX();
 	double dy = m_y - p.GetY();
 	double length = sqrt(dx * dx + dy * dy);
-	
+
 	if (length - p.GetSearchBox() <= m_size) {
 		if (m_RockType != 3) {
 			GameMap::m_rock[m_RockType].Num++;
-			GameMap::m_rock[m_RockType].Price = m_price;
+
+			// 레어도에 따른 운석 가치 배율 적용
+			// 0-Normal: x1, 1-Rare: x2, 2-Unique: x3, 3-Epic: x5, 4-Legendary: x10
+			int rare = GameMap::GetRare();
+			int rareMult = 1;
+			if (rare == 1) rareMult = 2;
+			else if (rare == 2) rareMult = 3;
+			else if (rare == 3) rareMult = 5;
+			else if (rare == 4) rareMult = 10;
+
+			GameMap::m_rock[m_RockType].Price = m_price * rareMult;
 		}
 		else {
 			player.SetAttackType(AttackTypeDist(generate2));
