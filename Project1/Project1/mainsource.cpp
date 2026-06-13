@@ -374,6 +374,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						}
 						else if (enforce[i].Get_Enforce_Type() == 5) {
 							// 무기상자 - 속도업 해금
+							for (int i = 0; i < MAX_ROCKS; i++) {
+								rock[i].UnlockRockType(3);
+							}
 						}
 					}
 				}
@@ -896,6 +899,7 @@ void GameOver(HWND hWnd)
 	KillTimer(hWnd, GoRarityShuffle);
 
 	isGaming = false;
+	player.SetAttackType(0);
 	InvalidateRect(hWnd, NULL, false);
 }
 

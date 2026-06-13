@@ -184,12 +184,22 @@ void Rock::Draw(HDC mDC, COLORREF color)
 		DeleteObject(hpBRUSH);         
 	}
 
-	HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
-	HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
-	Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+	if (m_RockType == 0) {
+		HBRUSH rBRUSH = CreateSolidBrush(RGB(255, 0, 0));
+		HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
+		Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
 
-	SelectObject(mDC, oldrBRUSH);         
-	DeleteObject(rBRUSH);                
+		SelectObject(mDC, oldrBRUSH);
+		DeleteObject(rBRUSH);
+	}
+	else if (m_RockType == 3) {
+		HBRUSH rBRUSH = CreateSolidBrush(RGB(0, 255, 0));
+		HBRUSH oldrBRUSH = (HBRUSH)SelectObject(mDC, rBRUSH);
+		Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
+
+		SelectObject(mDC, oldrBRUSH);
+		DeleteObject(rBRUSH);
+	}
 }
 
 void Rock::UnlockRockType(int rockType)
