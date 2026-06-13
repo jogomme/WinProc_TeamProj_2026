@@ -60,7 +60,9 @@ public:
 	// 연로 감소 함수 - 스테이지에 비례해 연료 감소량이 증가함
 	void ConsumeFual();
 
-	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont);
+	void Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont, HINSTANCE g_hInst);
+
+	void SetAngle(double mouseX, double mouseY);
 
 	void HealPlayer(double);
 
@@ -85,4 +87,7 @@ private:
 	bool m_AttackTypeChanged;
 
 	double m_length[MAX_ROCKS]; // 플레이어와 암석 사이의 거리
+	
+	int frameX = 0;
+	double m_angle;
 };

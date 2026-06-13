@@ -549,7 +549,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		yPos = GET_Y_LPARAM(lParam);
 		mx = LOWORD(lParam);
 		my = HIWORD(lParam);
-
+		
+		if (isGaming) {
+			player.SetAngle(xPos, yPos);
+		}
+		
 		if (drag == 1) {
 			for (int i = 0; i < MAX_ENFORCE; i++) {
 				double x = enforce[i].Get_Enforce_Point_x();
@@ -1067,7 +1071,7 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	}
 
 	// Player
-	player.Draw(mDC, rectView, hBrush, hFont);
+	player.Draw(mDC, rectView, hBrush, hFont, g_hInst);
 
 	// 스테이지 그리기
 	gMap.SetMGoal(gMap.GetStage() * 3);

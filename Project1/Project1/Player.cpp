@@ -30,6 +30,8 @@ Player::Player()
 	m_AttackSpeed = m_AttackSpeed_type_0;
 
 	m_AttackTypeChanged = false;
+
+	frameX = 0;
 }	
 
 Player::~Player()
@@ -152,6 +154,7 @@ void Player::Move(double targetX, double targetY)
 	// 거리가 내 이동 속도보다 가깝다면, 덜덜 떨리는 현상을 막기 위해 목표 위치에 고정시키고 종료
 	if (distance <= m_speed)
 	{
+		frameX = 200;
 		m_x = targetX;
 		m_y = targetY;
 		return;
@@ -167,36 +170,75 @@ void Player::Move(double targetX, double targetY)
 	m_y += dirY * m_speed;
 }
 
-void Player::Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont)
+void Player::Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont, HINSTANCE g_hInst)
 {
-	// Player의 본체 그리기 ( 실제 움직이는 것 )
-	HBRUSH pBRUSH = CreateSolidBrush(RGB(255, 255, 255));
-	HBRUSH oldpBRUSH = (HBRUSH)SelectObject(mDC, pBRUSH);
-	
-	Rectangle(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
-	DeleteObject(pBRUSH);
+	// 1. 프레임 선택
+	if (m_speed >= 8) frameX = 200;
+	else if (m_speed >= 5) frameX = 100;
 
+	// (경고: 이 로드는 생성자로 옮기는 것이 좋습니다!)
+	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP22));
+	HDC imgDC = CreateCompatibleDC(mDC);
+	HBITMAP oldBitmap = (HBITMAP)SelectObject(imgDC, imgBitmap);
 
-	// 연료바 그리기
-	// 현재 비율
+	// 2. GDI 고급 그래픽 모드 설정 (회전을 위해 필수)
+	SetGraphicsMode(mDC, GM_ADVANCED);
+
+	// 3. 변환 행렬(XFORM) 세팅
+	XFORM xForm;
+	double angle = m_angle + 3.14159265 / 2.0;
+
+	xForm.eM11 = (FLOAT)cos(angle);
+	xForm.eM12 = (FLOAT)sin(angle);
+	xForm.eM21 = (FLOAT)-sin(angle);
+	xForm.eM22 = (FLOAT)cos(angle);
+	// 기준점을 플레이어의 현재 위치로 이동
+	xForm.eDx = (FLOAT)m_x;
+	xForm.eDy = (FLOAT)m_y;
+
+	// 기존 화면의 변환 상태 백업
+	XFORM oldForm;
+	GetWorldTransform(mDC, &oldForm);
+
+	// 새로운 회전 변환 적용
+	SetWorldTransform(mDC, &xForm);
+
+	// 4. 이미지 그리기 (SetPixel 대신 TransparentBlt 사용)
+	int half = (int)m_size;
+	int size = half * 2;
+
+	// 중심점(m_x, m_y)이 (0,0)으로 이동된 상태이므로 -half 위치에 그립니다.
+	TransparentBlt(mDC, -half, -half, size, size, imgDC, frameX, 0, 100, 100, RGB(255, 255, 255));
+
+	// 5. 회전 변환 원래대로 복구 (이걸 안 하면 UI까지 돌아가버림)
+	SetWorldTransform(mDC, &oldForm);
+
+	SelectObject(imgDC, oldBitmap); 
+	DeleteDC(imgDC);
+	DeleteObject(imgBitmap);
+
+	// 6. UI (연료바) 그리기 - 메모리 누수 완벽 차단
 	double FualRate = m_fual / m_MaxFual;
 
+	// 뒷배경 바
 	HBRUSH oldBrush = (HBRUSH)SelectObject(mDC, hBrush[7]);
 	Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 405, rectView.top + 45);
 
-	oldBrush = (HBRUSH)SelectObject(mDC, hBrush[1]);
-	Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (FualRate) * 400, rectView.top + 45);
+	// 남은 연료 바
+	SelectObject(mDC, hBrush[1]); // 어차피 위에서 oldBrush 백업했으니 바로 교체
+	Rectangle(mDC, rectView.left + 5, rectView.top + 5, rectView.left + 5 + (int)(FualRate * 400), rectView.top + 45);
 
+	// 글자 출력
 	HFONT oldFont = (HFONT)SelectObject(mDC, hFont);
 	SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
 
-
 	wchar_t str[64];
-
-	int f = m_fual;
-	int mf = m_MaxFual;
-	wsprintf(str, L"%d / %d",f, mf);
+	wsprintf(str, L"%d / %d", (int)m_fual, (int)m_MaxFual);
 	TextOut(mDC, rectView.left + 165, rectView.top + 15, str, lstrlen(str));
+
+	// 7. 제일 중요한 GDI 리소스 원상복구 (메모리 누수 방지)
+	SelectObject(mDC, oldBrush);
+	SelectObject(mDC, oldFont);
 }
 
 void Player::ConsumeFual()
@@ -271,4 +313,11 @@ void Player::HealPlayer(double heal)
 {
 	m_fual += heal;
 	if (m_fual > m_MaxFual) m_fual = m_MaxFual;
+}
+
+void Player::SetAngle(double mouseX, double mouseY)
+{
+	double dx = mouseX - m_x;
+	double dy = mouseY - m_y;
+	m_angle = atan2(dy, dx); // 라디안
 }

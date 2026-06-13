@@ -1,5 +1,6 @@
 #pragma once
 #include "GameMap.h"
+#include "resource.h"
 
 struct Point
 {
