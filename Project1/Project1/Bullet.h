@@ -46,7 +46,7 @@ public :
 	void Crash(Rock& r);
 
 	// 그리기 함수
-	void Draw(HDC mDC);
+	void Draw(HDC mDC, int, HINSTANCE);
 
 	
 private :

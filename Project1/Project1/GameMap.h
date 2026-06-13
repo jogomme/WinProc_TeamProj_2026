@@ -37,7 +37,7 @@ public:
 	void SetStage(int stage);
 	void SetRockNum();
 	void SetMaximumRock(int plusNum);
-
+	void SetMGoal(int);
 
 	// 다음 스테이지로 넘어가는 함수
 	void NextStage(); 

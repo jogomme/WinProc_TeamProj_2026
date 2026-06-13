@@ -67,6 +67,11 @@ void GameMap::SetMaximumRock(int PlusNum)
 	MaximumRock += PlusNum;
 }
 
+void GameMap::SetMGoal(int goal)
+{
+	m_goal = goal;
+}
+
 void GameMap::NextStage()
 {
 	m_stage++;

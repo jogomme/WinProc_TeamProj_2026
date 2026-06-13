@@ -194,6 +194,13 @@
     <Image Include="Image\enforce\type1.bmp" />
     <Image Include="Image\enforce\type2.bmp" />
     <Image Include="Image\enforce\type3.bmp" />
+    <Image Include="Image\object\bullet.bmp" />
+    <Image Include="Image\object\plinko.bmp" />
+    <Image Include="Image\object\rocket.bmp" />
+    <Image Include="Image\object\stone1.bmp" />
+    <Image Include="Image\object\stone2.bmp" />
+    <Image Include="Image\object\stone3.bmp" />
+    <Image Include="Image\object\stone4.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

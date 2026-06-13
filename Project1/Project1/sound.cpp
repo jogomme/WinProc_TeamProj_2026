@@ -18,10 +18,6 @@ void Open_Sound()
 	mciSendString(L"open \"sound\\effect\\fail_enforce.wav\" type mpegvideo alias EFFECT_FEnforce", NULL, 0, NULL);
 	mciSendString(L"open \"sound\\effect\\plinko_coin.wav\" type mpegvideo alias EFFECT_Coin", NULL, 0, NULL);
 	mciSendString(L"open \"sound\\effect\\shoot.wav\" type mpegvideo alias EFFECT_Shoot", NULL, 0, NULL);
-
-	// VOLUME 1000 ~ 0
-	mciSendString(L"setaudio BGM_Fight volume to 700", NULL, 0, NULL);
-	mciSendString(L"setaudio EFFECT_Shoot volume to 100", NULL, 0, NULL);
 }
 void Stop_BGM()
 {
@@ -57,5 +53,26 @@ void Play_Sound(const wchar_t name[50])
 	wsprintf(cmd, L"seek %s to start", name);
 	mciSendString(cmd, NULL, 0, NULL);
 	wsprintf(cmd, L"play %s", name);
+	mciSendString(cmd, NULL, 0, NULL);
+}
+
+void Set_Volume(int v)
+{
+	wchar_t cmd[128] = {};
+	wsprintf(cmd, L"setaudio BGM_Lobby volume to %d", v * 100);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio BGM_Fight volume to %d", v * 70);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio BGM_Boss volume to %d", v * 100);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio EFFECT_Click1 volume to %d", v * 100);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio EFFECT_Enforce volume to %d", v * 100);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio EFFECT_FEnforce volume to %d", v * 100);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio EFFECT_Coin volume to %d", v * 100);
+	mciSendString(cmd, NULL, 0, NULL);
+	wsprintf(cmd, L"setaudio EFFECT_Shoot volume to %d", v * 10);
 	mciSendString(cmd, NULL, 0, NULL);
 }

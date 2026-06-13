@@ -135,6 +135,12 @@ int window_scene{0};
 int heal_percent{ 0 };
 double attack_heal{ 0 };
 
+// 설정창 버튼
+#define IDC_BUTTON1 1001
+#define IDC_BUTTON2 1002
+#define IDC_EDIT 2001
+int volume{ 10 };
+
 //-----------------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 //-----------------------------------------------------------------------------------------------
@@ -165,6 +171,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	static int return_setting; // 세팅 화면에 오기 전, 어디 화면 이었는지 저장
 
+	static HWND hButton1, hButton2, hEdit; // 설정 버튼
+
 	switch (iMessage) {
 	case WM_CREATE:
 		srand(time(NULL));
@@ -193,6 +201,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		imgBitmap[16] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP17)); // Return Enforce
 		imgBitmap[17] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP18)); // Setting
 		imgBitmap[18] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP19)); // Game Start
+
+		// 오브젝트
+		imgBitmap[19] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP20)); // bullet
+		imgBitmap[20] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP21)); // plinko
+		imgBitmap[21] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP22)); // rocket
+		imgBitmap[22] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP23)); // stone1
+		imgBitmap[23] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP24)); // stone2
+		imgBitmap[24] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP25)); // stone3
+		imgBitmap[25] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP26)); // stone4
 
 		GetClientRect(hWnd, &rectView);
 		rectViewMid.x = (rectView.left + rectView.right) / 2;
@@ -233,10 +250,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		drag = 0;
 
+
+		hButton1 = CreateWindow(L"button", L"Down", WS_CHILD | BS_PUSHBUTTON, 
+			rectViewMid.x - 120, rectViewMid.y - 20, 50, 40, hWnd, (HMENU)IDC_BUTTON1, g_hInst, NULL);
+		hButton2 = CreateWindow(L"button", L"Up", WS_CHILD | BS_PUSHBUTTON, 
+			rectViewMid.x + 70, rectViewMid.y - 20, 50, 40, hWnd, (HMENU)IDC_BUTTON2, g_hInst, NULL);
+
+		hEdit = CreateWindow(L"edit", L"", WS_CHILD | ES_READONLY, 
+			rectViewMid.x - 50, rectViewMid.y - 20, 100, 40, hWnd, (HMENU)IDC_EDIT, g_hInst, NULL);
+
+		{
+			TCHAR edit_str[50] = L"";
+			swprintf_s(edit_str, 50, L"Volume: %d: ", volume);
+			SetDlgItemText(hWnd, IDC_EDIT, edit_str);
+		}
+
 		Open_Sound();
+
+		Set_Volume(volume);
 
 		Play_Sound_BGM(L"BGM_Lobby");
 
+		break;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDC_BUTTON1:
+			volume -= 1;
+			if (volume < 0) volume = 0;
+			{
+				TCHAR edit_str[50] = L"";
+				swprintf_s(edit_str, 50, L"Volume: %d ", volume);
+				SetDlgItemText(hWnd, IDC_EDIT, edit_str);
+			}
+			Set_Volume(volume);
+			break;
+
+		case IDC_BUTTON2:
+			volume += 1;
+			if (volume > 10) volume = 10;
+			{
+				TCHAR edit_str[50] = L"";
+				swprintf_s(edit_str, 50, L"Volume: %d ", volume);
+				SetDlgItemText(hWnd, IDC_EDIT, edit_str);
+			}
+			Set_Volume(volume);
+			break;
+		}
+
+		InvalidateRect(hWnd, NULL, false);
 		break;
 
 	case WM_SIZE:
@@ -303,12 +365,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 				return_setting = window_scene;
 				window_scene = 3;
+
+				ShowWindow(hButton1, SW_SHOW);
+				ShowWindow(hButton2, SW_SHOW);
+				ShowWindow(hEdit, SW_SHOW);
 			}
 		}
 
 		// 강화 화면
 		else if (window_scene == 1) {
-			UseMoney(-5);
+			//UseMoney(-5); // 테스트를 위한 돈 벌기 한 줄
 			// 전투 진입 버튼 클릭
 			if (mx > rectView.left + 5 && mx < rectView.left + 205 &&
 				my > rectView.bottom - 85 && my < rectView.bottom - 5) {
@@ -337,6 +403,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				my > rectView.top + 5 && my < rectView.top + 45) {
 				return_setting = window_scene;
 				window_scene = 3;
+
+				ShowWindow(hButton1, SW_SHOW);
+				ShowWindow(hButton2, SW_SHOW);
+				ShowWindow(hEdit, SW_SHOW);
 				break;
 			}
 
@@ -425,6 +495,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			if (mx > rectViewMid.x - 50 && mx < rectViewMid.x + 50 &&
 				my > rectViewMid.y + 90 && my < rectViewMid.y + 140) {
 				window_scene = return_setting;
+
+				ShowWindow(hButton1, SW_HIDE);
+				ShowWindow(hButton2, SW_HIDE);
+				ShowWindow(hEdit, SW_HIDE);
 			}
 		}
 		// 플링코 화면
@@ -666,7 +740,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			MoneyBoxDraw(mDC);
 			plinkoDraw(mDC);
-			rocksDraw(mDC);
+			rocksDraw(mDC, g_hInst);
 
 			oldFont = (HFONT)SelectObject(mDC, hFont);
 			SetBkMode(mDC, TRANSPARENT); // 글자 배경 투명
@@ -710,16 +784,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_TIMER:
 		switch (wParam) {
 		case 1:
-			//player.Move(xPos, yPos);
 			break;
-		}
-
-		InvalidateRect(hWnd, NULL, false);
-		break;
-	
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-
 		}
 
 		InvalidateRect(hWnd, NULL, false);
@@ -923,7 +988,7 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	// 총알 Draw
 	for (int i = 0; i < MAX_BULLETS; ++i) {
 		if (bullet[i].GetIsActive()) {
-			bullet[i].Draw(mDC);
+			bullet[i].Draw(mDC, player.GetAttackType(), g_hInst);
 		}
 	}
 
@@ -938,6 +1003,7 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	player.Draw(mDC, rectView, hBrush, hFont);
 
 	// 스테이지 그리기
+	gMap.SetMGoal(gMap.GetStage() * 3);
 	gMap.Draw(mDC, rectView, hBrush, hFont);
 
 	for (int i = 0; i < MAX_FEED; ++i) {

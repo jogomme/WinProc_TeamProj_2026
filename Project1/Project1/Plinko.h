@@ -41,7 +41,7 @@ void UseMoney(int); // 해당 수치만큼 돈을 사용합니다
 void plinkoInit(HWND hWnd);
 void plinkoSpawn(const MinRock& rock, int type);	// 벡터에 rock 넣기
 
-void rocksDraw(HDC hDC);
+void rocksDraw(HDC hDC, HINSTANCE);
 void rockUpdate();
 
 bool pTimerCheck();

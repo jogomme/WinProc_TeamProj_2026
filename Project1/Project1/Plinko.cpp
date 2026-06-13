@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "GameObject.h"
 #include "GameMap.h"
+#include "resource.h"
 
 #define ROCK_SIZE 40	// 운석 사이즈
 #define GOAL_LINE 700	// 플랑코 목표 지점 Y 좌표 (m_y가 넘으면 인식)
@@ -386,26 +387,18 @@ void plinkoDraw(HDC hDC) {
 	}
 }
 
-void rocksDraw(HDC hDC) {
+void rocksDraw(HDC hDC, HINSTANCE g_hInst) {
+	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP21)); // plinko
+	HDC imgDC;
+	imgDC = CreateCompatibleDC(hDC);
+	SelectObject(imgDC, imgBitmap);
+
 	for (auto rock : rocks) {
-		HBRUSH brush;
-
-		if (rock->p_type == 0) {
-			brush = CreateSolidBrush(RGB(0, 0, 0));
-		}
-		else if (rock->p_type == 1) {
-			brush = CreateSolidBrush(RGB(255, 0, 0));
-		}
-		else {
-			brush = CreateSolidBrush(RGB(255, 255, 0));
-		}
-		HBRUSH oldBrush = (HBRUSH)SelectObject(hDC, brush);
-
-		Ellipse(hDC, (int)rock->GetX(), (int)rock->GetY(), (int)rock->GetX() + ROCK_SIZE, (int)rock->GetY() + ROCK_SIZE);
-		
-		SelectObject(hDC, oldBrush);
-		DeleteObject(brush);
+		TransparentBlt(hDC, (int)rock->GetX(), (int)rock->GetY(), ROCK_SIZE, ROCK_SIZE, imgDC, 3 + rock->p_type * 15, 3, 11, 11, RGB(0, 0, 0));
 	}
+
+	DeleteDC(imgDC);
+	DeleteObject(imgBitmap);
 }
 
 void rockUpdate() {		// 운석 내려감

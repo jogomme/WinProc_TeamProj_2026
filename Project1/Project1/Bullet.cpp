@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Bullet.h"
 #include "sound.h"
+#include "resource.h"
 
 #define INF 999
 
@@ -56,15 +57,22 @@ void Bullet::Move(double xPos, double yPos)
 }
 
 // 그리기 함수
-void Bullet::Draw(HDC mDC)
+void Bullet::Draw(HDC mDC, int type, HINSTANCE g_hInst)
 {
-	HBRUSH bBrush = CreateSolidBrush(RGB(0, 255, 0));
-	HBRUSH oldbBrush = (HBRUSH)SelectObject(mDC, bBrush);
+	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP20)); // bullet
+	HDC imgDC;
+	imgDC = CreateCompatibleDC(mDC);
+	SelectObject(imgDC, imgBitmap);
 
-	Ellipse(mDC, m_x - m_size, m_y - m_size, m_x + m_size, m_y + m_size);
-	
-	SelectObject(mDC, oldbBrush);
-	DeleteObject(bBrush);
+	if (type == 0) {
+		TransparentBlt(mDC, m_x - m_size * 1.5, m_y - m_size * 1.5, m_size * 1.5, m_size * 1.5, imgDC, 19, 1, 14, 14, RGB(0, 0, 0));
+	}
+	else {
+		TransparentBlt(mDC, m_x - m_size * 1.5, m_y - m_size * 1.5, m_size * 1.5, m_size * 1.5, imgDC, 19, 19, 14, 14, RGB(0, 0, 0));
+	}
+
+	DeleteDC(imgDC);
+	DeleteObject(imgBitmap);
 }
 
 double Bullet::GetLength(const Rock& r)

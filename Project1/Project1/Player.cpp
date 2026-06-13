@@ -102,6 +102,11 @@ bool Player::GetAttackTypeChanged() const
 	return m_AttackTypeChanged;
 }
 
+int Player::GetAttackType()
+{
+	return attackType;
+}
+
 void Player::Spawn()
 {
 	m_hp = max_hp;

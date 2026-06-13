@@ -78,6 +78,20 @@ IDB_BITMAP18            BITMAP                  "Image\\Button\\Setting_Button.b
 
 IDB_BITMAP19            BITMAP                  "Image\\Button\\Start_Button.bmp"
 
+IDB_BITMAP20            BITMAP                  "Image\\object\\bullet.bmp"
+
+IDB_BITMAP21            BITMAP                  "Image\\object\\plinko.bmp"
+
+IDB_BITMAP22            BITMAP                  "Image\\object\\rocket.bmp"
+
+IDB_BITMAP23            BITMAP                  "Image\\object\\stone1.bmp"
+
+IDB_BITMAP24            BITMAP                  "Image\\object\\stone2.bmp"
+
+IDB_BITMAP25            BITMAP                  "Image\\object\\stone3.bmp"
+
+IDB_BITMAP26            BITMAP                  "Image\\object\\stone4.bmp"
+
 #endif    // 한국어(대한민국) resources
 /////////////////////////////////////////////////////////////////////////////
 

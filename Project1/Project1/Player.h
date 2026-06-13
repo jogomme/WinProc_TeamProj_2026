@@ -40,7 +40,8 @@ public:
 	Point GetMinLengthRock();
 	
 	// 강화화 관련된 함수
-	void SetAttackType(int type);// 공격 종류 설정 함수
+	int GetAttackType(); // 공격 종류 반환
+	void SetAttackType(int type); // 공격 종류 설정 함수
 	
 	// 강화화 관련된 함수 - 아래 세 함수들은 값을 넣어주면 그만큼 값이 증가한다.
 	void SetFual(double deg); // 연료 설정 함수
