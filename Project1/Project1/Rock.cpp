@@ -37,6 +37,8 @@ std::uniform_int_distribution<int> yPosDist(0, 800);
 // 운석 생성시 생기는 공간 텀
 std::uniform_int_distribution<int> PlusPosDist(30, 120);
 
+extern HBITMAP imgBitmap[50];
+
 int Rock::gid{ 0 }; // 암석 고유 번호를 위한 변수 초기화
 
 Rock::Rock()
@@ -187,23 +189,16 @@ void Rock::Draw(HDC mDC, HINSTANCE g_hInst)
 		DeleteObject(hpBRUSH);
 	}
 
-	HBITMAP imgBitmap[5];
-	imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP23)); // stone1
-	imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP24)); // stone2
-	imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP25)); // stone3
-	imgBitmap[3] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP26)); // stone4
+	HDC imgDC = CreateCompatibleDC(mDC);
 
-	HDC imgDC;
-	imgDC = CreateCompatibleDC(mDC);
-	SelectObject(imgDC, imgBitmap[m_RockType]);
+	// 💡 22번 인덱스부터 운석 이미지이므로 22 + m_RockType 으로 지정해야 합니다.
+	HBITMAP oldBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[22 + m_RockType]);
 
-	TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 0 + 150 * m_motion, 0, 150, 150, RGB(255, 255, 255));
+	TransparentBlt(mDC, (int)(m_x - m_size), (int)(m_y - m_size), (int)m_size * 2, (int)m_size * 2, imgDC, 0 + 150 * m_motion, 0, 150, 150, RGB(255, 255, 255));
 
+	// 💡 원래 있던 비트맵으로 원상복구 (메모리 누수 방지)
+	SelectObject(imgDC, oldBmp);
 	DeleteDC(imgDC);
-	DeleteObject(imgBitmap[0]);
-	DeleteObject(imgBitmap[1]);
-	DeleteObject(imgBitmap[2]);
-	DeleteObject(imgBitmap[3]);
 }
 
 void Rock::UnlockRockType(int rockType)

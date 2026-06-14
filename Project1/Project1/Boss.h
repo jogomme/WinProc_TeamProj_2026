@@ -7,7 +7,7 @@
 // C2601(지역 함수 정의 오류), C1075 등이 발생합니다.
 class Player;
 
-#define MAX_BOSS_BULLETS 500
+#define MAX_BOSS_BULLETS 50000
 
 // 보스 전용 탄막 총알 구조체
 struct BossBullet {
@@ -44,4 +44,5 @@ private:
 	int attackPattern;   // 0: 원형 확산, 1: 나선형 회전 등 패턴 구분용
 	double patternAngle; // 나선형 회전 각도 기억용
 	BossBullet bBullets[MAX_BOSS_BULLETS];
+	double max_hp;
 };

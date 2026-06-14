@@ -64,6 +64,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 //-----------------------------------------------------------------------------------------------
+// 이미지 선언 구간
+//-----------------------------------------------------------------------------------------------
+HBITMAP imgBitmap[50];
+
+//-----------------------------------------------------------------------------------------------
 // 랜덤값 선언 구간
 //-----------------------------------------------------------------------------------------------
 
@@ -81,7 +86,8 @@ void GameOver(HWND hWnd);
 
 void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont);
 void GameSleep(HWND hWnd);
-void CheckBossMerge();
+void CheckBossMerge(HWND hWnd);
+void DropBossReward(double x, double y); // 보스 처치 보상 드랍
 //-----------------------------------------------------------------------------------------------
 // 전역 변수 선언 구간
 //-----------------------------------------------------------------------------------------------
@@ -154,7 +160,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hDC, mDC, imgDC; // hDC - 최종 출력 화면 / mDC - 더블 퍼버링용. 대부분의 그림 출력은 여기에 / imgDC - 그림 선택할 때 사용.
 	HBITMAP hBitmap; // 비트맵
-	static HBITMAP imgBitmap[50]; // 이미지 로딩
 	static BITMAP imgBmp; // 이미지 크기 잡는용, 배경 잡는용으로 썼는데, 배열로 바꿔서 써도 될듯
 	static HPEN hPen[10], oldPen;
 	static HBRUSH hBrush[10], oldBrush;
@@ -332,6 +337,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			std::cout << "Show Me The Money" << '\n';
 			SetMoney(10000);
 			player.SetFual(10000);
+			InvalidateRect(hWnd, NULL, false);
 		}
 
 		else if (wParam == VK_SPACE) {
@@ -352,11 +358,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					if (rand_temp <= heal_percent) {
 						player.HealPlayer(player.GetMaxFual());
 					}
+					InvalidateRect(hWnd, NULL, false);
 				}
 			}
 		}
 
-		InvalidateRect(hWnd, NULL, false);
 		break;
 	case WM_KEYUP: {
 		if (wParam == VK_SPACE) {
@@ -556,11 +562,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		yPos = GET_Y_LPARAM(lParam);
 		mx = LOWORD(lParam);
 		my = HIWORD(lParam);
-		
+
 		if (isGaming) {
 			player.SetAngle(xPos, yPos);
 		}
-		
+
 		if (drag == 1) {
 			for (int i = 0; i < MAX_ENFORCE; i++) {
 				double x = enforce[i].Get_Enforce_Point_x();
@@ -856,7 +862,7 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			return;
 		}
 
-		CheckBossMerge();
+		CheckBossMerge(hWnd);
 
 		player.Move(xPos, yPos);
 
@@ -866,15 +872,45 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			rock[i].Move(width, height);
 		}
 
+		// 총알 처리: 보스 충돌 -> 암석 충돌 -> 이동 (한 프레임에 한 번만 이동)
 		for (int i = 0; i < MAX_BULLETS; ++i) {
-			if (bullet[i].GetIsActive()) {
+			if (!bullet[i].GetIsActive()) continue;
 
-				for (int j = 0; j < MAX_ROCKS; ++j) {
-					bullet[i].Crash(rock[j]);
+			// 보스 타격 체크 (이동 전 위치 기준)
+			if (boss.IsActive()) {
+				double dx = boss.GetX() - bullet[i].GetX();
+				double dy = boss.GetY() - bullet[i].GetY();
+				if (sqrt(dx * dx + dy * dy) < boss.GetSize() + 10) {
+					double dmg = bullet[i].GetAttackPower();
+					bullet[i].SetActive(false);
+					bool bossDead = boss.TakeDamage(dmg);
+					if (bossDead) {
+						KillTimer(hWnd, GoBossAttack);
+						DropBossReward(boss.GetX(), boss.GetY());
+					}
+					continue; // 보스에 명중했으면 이동/암석충돌 처리 생략
 				}
+			}
 
+			// 암석 충돌 체크
+			for (int j = 0; j < MAX_ROCKS; ++j) {
+				bullet[i].Crash(rock[j]);
+			}
+
+			// 한 프레임에 한 번만 이동
+			if (bullet[i].GetIsActive()) {
 				bullet[i].Move(width, height);
+			}
 
+			// 플레이어랑 보스 몸통 박치기 검사
+			double dx = player.GetX() - boss.GetX();
+			double dy = player.GetY() - boss.GetY();
+
+			// 판정을 살짝 너그럽게(-5) 해주고, 닿으면 즉사 처리!
+			if (sqrt(dx * dx + dy * dy) < player.GetSize() + boss.GetSize() - 5.0) {
+				player.GetDemege(999.0);
+				GameOver(hWnd);          
+				return;                
 			}
 		}
 
@@ -882,27 +918,6 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			if (feed[i].GetActive()) {
 				feed[i].Move(width, height);
 				feed[i].SetLength(player);
-			}
-		}
-
-		// 플레이어 총알 - 보스 타격 체크 (SetActive 후 GetAttackPower 호출 버그 수정)
-		for (int i = 0; i < MAX_BULLETS; ++i) {
-			if (bullet[i].GetIsActive()) {
-				if (boss.IsActive()) {
-					double dx = boss.GetX() - bullet[i].GetX();
-					double dy = boss.GetY() - bullet[i].GetY();
-					if (sqrt(dx * dx + dy * dy) < boss.GetSize() + 10) {
-						double dmg = bullet[i].GetAttackPower();
-						bullet[i].SetActive(false);
-						bool bossDead = boss.TakeDamage(dmg);
-						if (bossDead) {
-							KillTimer(hWnd, GoBossAttack);
-						}
-					}
-				}
-				if (bullet[i].GetIsActive()) {
-					bullet[i].Move(width, height);
-				}
 			}
 		}
 
@@ -925,16 +940,27 @@ void CALLBACK TimerProc(HWND hWnd, UINT iMsg, UINT idEvent, DWORD dwTime) {
 			player.SetAttackTypeChanged(false);
 		}
 
-		int targetRockID = player.GetMinLengthID();
-
-		if (targetRockID != -1) {
-
+		// 보스가 활성화되어 있으면 보스를 최우선 타겟으로 공격
+		if (boss.IsActive()) {
 			for (int i = 0; i < MAX_BULLETS; i++) {
 				if (!bullet[i].GetIsActive()) {
-
-					bullet[i].Spawn(player, rock[targetRockID]);
-
+					bullet[i].Spawn(player, boss.GetX(), boss.GetY());
 					break;
+				}
+			}
+		}
+		else {
+			int targetRockID = player.GetMinLengthID();
+
+			if (targetRockID != -1) {
+
+				for (int i = 0; i < MAX_BULLETS; i++) {
+					if (!bullet[i].GetIsActive()) {
+
+						bullet[i].Spawn(player, rock[targetRockID]);
+
+						break;
+					}
 				}
 			}
 		}
@@ -1108,7 +1134,7 @@ void GameSleep(HWND hWnd)
 	KillTimer(hWnd, GoConsumeFual);
 }
 
-void CheckBossMerge()
+void CheckBossMerge(HWND hWnd)
 {
 	// 2스테이지가 아니거나, 이미 보스가 살아있으면 검사 안 함
 	if (gMap.GetStage() != 2 || boss.IsActive()) return;
@@ -1152,9 +1178,35 @@ void CheckBossMerge()
 				}
 			}
 
+			SetTimer(hWnd, GoBossAttack, 800, (TIMERPROC)TimerProc);
+
 			// 중심점에 보스 스폰!
 			boss.Spawn(centerX, centerY);
 			return; // 한 번 스폰되면 루프 종료
+		}
+	}
+}
+
+// 보스 처치 보상: 가장 비싼 일반 운석(Type 2, 가격 15)을 다수 드랍 + 보너스로 공격 타입 변경 피드 1개 드랍
+void DropBossReward(double x, double y)
+{
+	const int BOSS_REWARD_COUNT = 15; // 드랍될 Feed 개수
+	const int RICHEST_ROCK_TYPE = 2;  // Type 2 (가격 15) - 일반 운석 중 가장 비쌈
+	const double RICHEST_ROCK_PRICE = 15.0;
+
+	int dropped = 0;
+	for (int k = 0; k < MAX_FEED && dropped < BOSS_REWARD_COUNT; k++) {
+		if (!feed[k].GetActive()) {
+			feed[k].Drop(x, y, RICHEST_ROCK_PRICE, RICHEST_ROCK_TYPE);
+			dropped++;
+		}
+	}
+
+	// 보너스: 공격 타입 변경 피드(Type 3) 1개 추가 드랍
+	for (int k = 0; k < MAX_FEED; k++) {
+		if (!feed[k].GetActive()) {
+			feed[k].Drop(x, y, 50.0, 3);
+			break;
 		}
 	}
 }

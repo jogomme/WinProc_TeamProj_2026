@@ -8,6 +8,8 @@
 
 #define INF 999
 
+extern HBITMAP imgBitmap[50];
+
 Bullet::Bullet()
 {
 	m_speed = 30;
@@ -46,8 +48,26 @@ void Bullet::Spawn(const Player& p, const Rock& r)
 	Play_Sound(L"EFFECT_Shoot");
 }
 
+// 좌표(x, y) 기반 생성 함수 - 보스 등 Rock이 아닌 대상을 타겟할 때 사용
+void Bullet::Spawn(const Player& p, double targetX, double targetY)
+{
+	int px = p.GetX();
+	int py = p.GetY();
+
+	m_attackPower = p.GetAttackPower();
+
+	isActive = true;
+
+	m_x = px;
+	m_y = py;
+
+	SetDir(targetX, targetY);
+
+	Play_Sound(L"EFFECT_Shoot");
+}
+
 // 이동 함수
-void Bullet::Move(double xPos, double yPos) 
+void Bullet::Move(double xPos, double yPos)
 {
 	// 암석이 이동하는 함수. setDirection으로 설정한 방향벡터에 속도를 곱해서 이동.
 	m_x += m_direction[0] * m_speed;
@@ -59,10 +79,8 @@ void Bullet::Move(double xPos, double yPos)
 // 그리기 함수
 void Bullet::Draw(HDC mDC, int type, HINSTANCE g_hInst)
 {
-	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP20)); // bullet
-	HDC imgDC;
-	imgDC = CreateCompatibleDC(mDC);
-	SelectObject(imgDC, imgBitmap);
+	HDC imgDC = CreateCompatibleDC(mDC);
+	HBITMAP oldBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[19]);
 
 	if (type == 0) {
 		TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 19, 1, 14, 14, RGB(0, 0, 0));
@@ -71,8 +89,8 @@ void Bullet::Draw(HDC mDC, int type, HINSTANCE g_hInst)
 		TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 19, 19, 14, 14, RGB(0, 0, 0));
 	}
 
+	SelectObject(imgDC, oldBmp);
 	DeleteDC(imgDC);
-	DeleteObject(imgBitmap);
 }
 
 double Bullet::GetLength(const Rock& r)
@@ -103,6 +121,21 @@ void Bullet::SetDir(const Rock& r)
 	m_direction[1] = dy / distance;
 }
 
+// 좌표(x, y) 기반 방향벡터 생성 후 정규화 - 보스 타겟용
+void Bullet::SetDir(double targetX, double targetY)
+{
+	double dx = targetX - m_x;
+	double dy = targetY - m_y;
+	double distance = sqrt(dx * dx + dy * dy);
+
+	// (0으로 나누는 에러 방지)
+	if (distance == 0) return;
+
+	// 정규화
+	m_direction[0] = dx / distance;
+	m_direction[1] = dy / distance;
+}
+
 void Bullet::SetActive(bool b)
 {
 	isActive = b;
@@ -110,7 +143,7 @@ void Bullet::SetActive(bool b)
 
 
 // 화면 밖으로 나갔는지 체크하는 함수
-void Bullet::CheckBoundary(int width, int height) 
+void Bullet::CheckBoundary(int width, int height)
 {
 	if (isActive) {
 		// 화면 밖으로 완전히 나갔다면
@@ -123,7 +156,7 @@ void Bullet::CheckBoundary(int width, int height)
 }
 
 // Getter
-bool Bullet::GetIsActive() const 
+bool Bullet::GetIsActive() const
 {
 	return isActive;
 }

@@ -6,6 +6,8 @@
 
 #define INF 999
 
+extern HBITMAP imgBitmap[50];
+
 Player::Player()
 {
 	m_attackPower = 1;
@@ -176,46 +178,33 @@ void Player::Draw(HDC mDC, RECT rectView, HBRUSH hBrush[], HFONT hFont, HINSTANC
 	if (m_speed >= 8) frameX = 200;
 	else if (m_speed >= 5) frameX = 100;
 
-	// (경고: 이 로드는 생성자로 옮기는 것이 좋습니다!)
-	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP22));
 	HDC imgDC = CreateCompatibleDC(mDC);
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(imgDC, imgBitmap);
+	// 💡 플레이어 로켓은 21번 인덱스입니다.
+	HBITMAP oldBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[21]);
 
-	// 2. GDI 고급 그래픽 모드 설정 (회전을 위해 필수)
+	// 회전 행렬 적용
 	SetGraphicsMode(mDC, GM_ADVANCED);
-
-	// 3. 변환 행렬(XFORM) 세팅
 	XFORM xForm;
 	double angle = m_angle + 3.14159265 / 2.0;
-
+	// ... (행렬 계산 코드는 기존과 동일하게 유지) ...
 	xForm.eM11 = (FLOAT)cos(angle);
 	xForm.eM12 = (FLOAT)sin(angle);
 	xForm.eM21 = (FLOAT)-sin(angle);
 	xForm.eM22 = (FLOAT)cos(angle);
-	// 기준점을 플레이어의 현재 위치로 이동
 	xForm.eDx = (FLOAT)m_x;
 	xForm.eDy = (FLOAT)m_y;
 
-	// 기존 화면의 변환 상태 백업
 	XFORM oldForm;
 	GetWorldTransform(mDC, &oldForm);
-
-	// 새로운 회전 변환 적용
 	SetWorldTransform(mDC, &xForm);
 
-	// 4. 이미지 그리기 (SetPixel 대신 TransparentBlt 사용)
 	int half = (int)m_size;
-	int size = half * 2;
+	TransparentBlt(mDC, -half, -half, half * 2, half * 2, imgDC, frameX, 0, 100, 100, RGB(255, 255, 255));
 
-	// 중심점(m_x, m_y)이 (0,0)으로 이동된 상태이므로 -half 위치에 그립니다.
-	TransparentBlt(mDC, -half, -half, size, size, imgDC, frameX, 0, 100, 100, RGB(255, 255, 255));
+	SetWorldTransform(mDC, &oldForm); // 복구
 
-	// 5. 회전 변환 원래대로 복구 (이걸 안 하면 UI까지 돌아가버림)
-	SetWorldTransform(mDC, &oldForm);
-
-	SelectObject(imgDC, oldBitmap); 
+	SelectObject(imgDC, oldBmp); // 💡 비트맵 원상복구
 	DeleteDC(imgDC);
-	DeleteObject(imgBitmap);
 
 	// 6. UI (연료바) 그리기 - 메모리 누수 완벽 차단
 	double FualRate = m_fual / m_MaxFual;

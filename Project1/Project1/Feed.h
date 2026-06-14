@@ -19,7 +19,7 @@ public :
 	void SetActive(bool b);
 
 	void Move(double x, double y) override;
-
+	void Drop(double x, double y, double price, int rockType);
 private:
 
 };

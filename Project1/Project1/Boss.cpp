@@ -5,6 +5,8 @@
 // PI 매크로 충돌 방지를 위해 상수형 변수로 선언
 const double BOSS_PI = 3.14159265358979;
 
+extern HBITMAP imgBitmap[50];
+
 Boss::Boss()
 {
 	m_isActive = false;
@@ -13,6 +15,7 @@ Boss::Boss()
 	m_speed = 1.0;
 	attackPattern = 0;
 	patternAngle = 0.0;
+	max_hp = 30;
 
 	for (int i = 0; i < MAX_BOSS_BULLETS; i++) {
 		bBullets[i].active = false;
@@ -25,10 +28,14 @@ void Boss::Spawn(double x, double y)
 {
 	m_x = x;
 	m_y = y;
-	m_hp = 100.0;
+	m_hp = max_hp;
 	m_isActive = true;
 	attackPattern = 0;
 	patternAngle = 0.0;
+
+	for (int i = 0; i < MAX_BOSS_BULLETS; i++) {
+		bBullets[i].active = false;
+	}
 }
 
 bool Boss::TakeDamage(double dmg)
@@ -145,20 +152,19 @@ void Boss::Draw(HDC mDC, HINSTANCE g_hInst)
 {
 	if (!m_isActive) return;
 
-	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP28)); // boss
-	HDC imgDC;
-	imgDC = CreateCompatibleDC(mDC);
-	SelectObject(imgDC, imgBitmap);
+	HDC imgDC = CreateCompatibleDC(mDC);
+	// 💡 보스 이미지는 27번 인덱스입니다.
+	HBITMAP oldBmp = (HBITMAP)SelectObject(imgDC, imgBitmap[27]);
 
 	TransparentBlt(mDC, (int)(m_x - m_size), (int)(m_y - m_size), m_size * 2, m_size * 2, imgDC, 0, 0, 100, 100, RGB(255, 255, 255));
-	
+
+	SelectObject(imgDC, oldBmp); 
 	DeleteDC(imgDC);
-	DeleteObject(imgBitmap);
 
 	HBRUSH hpBrush = CreateSolidBrush(RGB(255, 0, 0));
 	HBRUSH oldHpBrush = (HBRUSH)SelectObject(mDC, hpBrush);
 
-	double hpRate = m_hp / 100.0;
+	double hpRate = m_hp / max_hp;
 	Rectangle(mDC, (int)(m_x - m_size), (int)(m_y - m_size - 15),
 		(int)(m_x - m_size + (m_size * 2.0 * hpRate)), (int)(m_y - m_size - 5));
 

@@ -26,6 +26,7 @@ public :
 
 	// 생성 함수
 	void Spawn(const Player& p, const Rock& r);
+	void Spawn(const Player& p, double targetX, double targetY);
 	
 	void SetActive(bool b);
 
@@ -34,6 +35,8 @@ public :
 
 	// 방향 벡터 초기화 함수
 	void SetDir(const Rock& r);
+	void SetDir(double targetX, double targetY);
+
 	void CheckBoundary(int width, int height);
 	
 	// Getter 함수
@@ -48,7 +51,6 @@ public :
 	// 그리기 함수
 	void Draw(HDC mDC, int, HINSTANCE);
 
-	
 private :
 	// 방향 벡터
 	double m_direction[2];

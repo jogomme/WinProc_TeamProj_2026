@@ -38,7 +38,7 @@ public:
 	void SetRockNum();
 	void SetMaximumRock(int plusNum);
 	void SetMGoal(int);
-	void SetRare(int);
+	void SetRare(int deg);
 
 	// 다음 스테이지로 넘어가는 함수
 	void NextStage(); 

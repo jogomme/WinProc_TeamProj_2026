@@ -43,7 +43,27 @@ void Feed::Drop(const Rock& r)
 
 	}
 	// 3. 파편의 튀는 속도를 랜덤하게 지정
-	m_speed = ((rand() % 5) + 3) / 3;
+	m_speed = ((rand() % 5) + 3) / 3.0; // 정수 나눗셈 버그 수정 (3 -> 3.0)
+}
+
+// 좌표/가격/타입을 직접 지정해서 드랍 (보스 처치 보상 등 Rock 객체가 없는 경우 사용)
+void Feed::Drop(double x, double y, double price, int rockType)
+{
+	m_x = x;
+	m_y = y;
+	m_price = price;
+
+	isActive = true;
+
+	m_RockType = rockType;
+
+	if (m_RockType != 3) {
+		int randomX = (rand() % 200) - 100;
+		int randomY = (rand() % 200) - 100;
+		setDirection(m_x + randomX, m_y + randomY);
+	}
+
+	m_speed = ((rand() % 5) + 3) / 3.0;
 }
 
 void Feed::SetLength(Player& p)
