@@ -92,6 +92,10 @@ IDB_BITMAP25            BITMAP                  "Image\\object\\stone3.bmp"
 
 IDB_BITMAP26            BITMAP                  "Image\\object\\stone4.bmp"
 
+IDB_BITMAP27            BITMAP                  "Image\\enforce\\new_stone.bmp"
+
+IDB_BITMAP28            BITMAP                  "Image\\object\\boss.bmp"
+
 #endif    // 한국어(대한민국) resources
 /////////////////////////////////////////////////////////////////////////////
 

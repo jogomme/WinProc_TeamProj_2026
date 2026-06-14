@@ -198,6 +198,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		imgBitmap[9] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP10)); // type1
 		imgBitmap[10] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP12)); // type3
 		imgBitmap[11] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP11)); // type2
+		imgBitmap[26] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP27)); // new_stone
 
 		// 버튼 이미지
 		imgBitmap[12] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP13)); // Done
@@ -216,6 +217,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		imgBitmap[23] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP24)); // stone2
 		imgBitmap[24] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP25)); // stone3
 		imgBitmap[25] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP26)); // stone4
+		imgBitmap[27] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP28)); // boss
 
 		GetClientRect(hWnd, &rectView);
 		rectViewMid.x = (rectView.left + rectView.right) / 2;
@@ -466,8 +468,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						}
 						else if (enforce[i].Get_Enforce_Type() == 5) {
 							// 무기상자 - 속도업 해금
-							for (int i = 0; i < MAX_ROCKS; i++) {
-								rock[i].UnlockRockType(3);
+							for (int j = 0; j < MAX_ROCKS; j++) {
+								rock[j].UnlockRockType(3);
 							}
 						}
 						else if (enforce[i].Get_Enforce_Type() == 6) {
@@ -475,6 +477,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						}
 						else if (enforce[i].Get_Enforce_Type() == 7) {
 							attack_heal += enforce[i].Get_Enforce_Amount();
+						}
+						else if (enforce[i].Get_Enforce_Type() == 8) {
+							for (int j = 0; j < MAX_ROCKS; j++) {
+								rock[j].UnlockRockType(enforce[i].Get_Enforce_Amount());
+							}
 						}
 					}
 				}
@@ -620,6 +627,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 					if (enforce[i].Get_Enforce_Type()) {
 						SelectObject(imgDC, imgBitmap[4 + enforce[i].Get_Enforce_Type()]);
+						if(enforce[i].Get_Enforce_Type()==8)
+							SelectObject(imgDC, imgBitmap[26]);
 						TransparentBlt(mDC, x - enforce_size, y - enforce_size, enforce_size * 2, enforce_size * 2, imgDC, 0, 0, 400, 400, RGB(255, 255, 255));
 					}
 					oldFont = (HFONT)SelectObject(mDC, hFont);
@@ -647,6 +656,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					}
 					else if (enforce[i].Get_Enforce_Type() == 7) {
 						wsprintf(str, L"공격시 연료 회복");
+					}
+					else if (enforce[i].Get_Enforce_Type() == 8) {
+						wsprintf(str, L"암석 추가");
 					}
 					else {
 						wsprintf(str, L"미구현");
@@ -1060,7 +1072,7 @@ void DrawFight(HDC mDC, HWND hWnd, RECT rectView, HBRUSH hBrush[], HFONT hFont)
 	}
 
 	if (boss.IsActive()) {
-		boss.Draw(mDC);
+		boss.Draw(mDC, g_hInst);
 		boss.DrawBullets(mDC);
 	}
 

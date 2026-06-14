@@ -141,17 +141,19 @@ bool Boss::CheckBulletCollision(Player& p)
 	return false;
 }
 
-void Boss::Draw(HDC mDC)
+void Boss::Draw(HDC mDC, HINSTANCE g_hInst)
 {
 	if (!m_isActive) return;
 
-	HBRUSH bBrush = CreateSolidBrush(RGB(150, 0, 200));
-	HBRUSH oldbBrush = (HBRUSH)SelectObject(mDC, bBrush);
+	HBITMAP imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP28)); // boss
+	HDC imgDC;
+	imgDC = CreateCompatibleDC(mDC);
+	SelectObject(imgDC, imgBitmap);
 
-	Rectangle(mDC, (int)(m_x - m_size), (int)(m_y - m_size), (int)(m_x + m_size), (int)(m_y + m_size));
-
-	SelectObject(mDC, oldbBrush);
-	DeleteObject(bBrush);
+	TransparentBlt(mDC, (int)(m_x - m_size), (int)(m_y - m_size), m_size * 2, m_size * 2, imgDC, 0, 0, 100, 100, RGB(255, 255, 255));
+	
+	DeleteDC(imgDC);
+	DeleteObject(imgBitmap);
 
 	HBRUSH hpBrush = CreateSolidBrush(RGB(255, 0, 0));
 	HBRUSH oldHpBrush = (HBRUSH)SelectObject(mDC, hpBrush);

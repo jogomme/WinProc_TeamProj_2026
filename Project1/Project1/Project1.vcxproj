@@ -192,10 +192,12 @@
     <Image Include="Image\enforce\attack.bmp" />
     <Image Include="Image\enforce\attack_speed.bmp" />
     <Image Include="Image\enforce\fuel.bmp" />
+    <Image Include="Image\enforce\new_stone.bmp" />
     <Image Include="Image\enforce\speed.bmp" />
     <Image Include="Image\enforce\type1.bmp" />
     <Image Include="Image\enforce\type2.bmp" />
     <Image Include="Image\enforce\type3.bmp" />
+    <Image Include="Image\object\boss.bmp" />
     <Image Include="Image\object\bullet.bmp" />
     <Image Include="Image\object\plinko.bmp" />
     <Image Include="Image\object\rocket.bmp" />

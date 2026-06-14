@@ -155,8 +155,8 @@ void Enforce::Start_Setting(Enforce& ef, int cnt)
 	}
 	else if (cnt == 12) {
 		ef.Set_Pos(2, 3);
-		ef.Set_TAP(0, 0, 1);
-		ef.Set_Drawing(-1, -1, -1);
+		ef.Set_TAP(8, 1, 20);
+		ef.Set_Drawing(17, -1, -1);
 	}
 	else if (cnt == 13) {
 		ef.Set_Pos(-1, 3);
@@ -176,6 +176,11 @@ void Enforce::Start_Setting(Enforce& ef, int cnt)
 	else if (cnt == 16) {
 		ef.Set_Pos(-2, 0);
 		ef.Set_TAP(1, 1, 1);
+		ef.Set_Drawing(-1, -1, -1);
+	}
+	else if (cnt == 17) {
+		ef.Set_Pos(3, 3);
+		ef.Set_TAP(8, 2, 30);
 		ef.Set_Drawing(-1, -1, -1);
 	}
 }

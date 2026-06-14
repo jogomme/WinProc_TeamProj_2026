@@ -26,7 +26,7 @@ public:
 	// 생성 및 이동
 	void Spawn(double x, double y);
 	void Move(double px, double py) override; // 플레이어를 향해 서서히 이동
-	void Draw(HDC mDC);
+	void Draw(HDC mDC, HINSTANCE);
 
 	// 탄막(총알) 관련
 	void FireDanmaku(const Player& p);  // 탄막 발사 패턴 로직

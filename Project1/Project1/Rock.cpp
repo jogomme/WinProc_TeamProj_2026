@@ -187,24 +187,23 @@ void Rock::Draw(HDC mDC, HINSTANCE g_hInst)
 		DeleteObject(hpBRUSH);
 	}
 
-	HBITMAP imgBitmap = NULL;
-	if(m_RockType == 0)
-		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP23)); // stone1
-	else if (m_RockType == 1)
-		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP24)); // stone2
-	else if (m_RockType == 2)
-		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP25)); // stone3
-	else if (m_RockType == 3)
-		imgBitmap = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP26)); // stone4
+	HBITMAP imgBitmap[5];
+	imgBitmap[0] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP23)); // stone1
+	imgBitmap[1] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP24)); // stone2
+	imgBitmap[2] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP25)); // stone3
+	imgBitmap[3] = LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_BITMAP26)); // stone4
 
 	HDC imgDC;
 	imgDC = CreateCompatibleDC(mDC);
-	SelectObject(imgDC, imgBitmap);
+	SelectObject(imgDC, imgBitmap[m_RockType]);
 
 	TransparentBlt(mDC, m_x - m_size, m_y - m_size, m_size * 2, m_size * 2, imgDC, 0 + 150 * m_motion, 0, 150, 150, RGB(255, 255, 255));
 
 	DeleteDC(imgDC);
-	DeleteObject(imgBitmap);
+	DeleteObject(imgBitmap[0]);
+	DeleteObject(imgBitmap[1]);
+	DeleteObject(imgBitmap[2]);
+	DeleteObject(imgBitmap[3]);
 }
 
 void Rock::UnlockRockType(int rockType)
