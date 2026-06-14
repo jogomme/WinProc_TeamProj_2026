@@ -1140,7 +1140,7 @@ void CheckBossMerge(HWND hWnd)
 	if (gMap.GetStage() != 2 || boss.IsActive()) return;
 
 	int mergeRadius = 150; // 융합 반경(픽셀)
-	int mergeCondition = 2; // 5개가 모이면 융합
+	int mergeCondition = 4; // 5개가 모이면 융합
 
 	for (int i = 0; i < MAX_ROCKS; i++) {
 		if (!rock[i].GetActive()) continue;
