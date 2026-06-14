@@ -1,0 +1,113 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+#include <winres.h>
+/////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP1             BITMAP                  "Image\\backimage\\space.bmp"
+
+IDB_BITMAP2             BITMAP                  "Image\\backimage\\space2.bmp"
+
+IDB_BITMAP3             BITMAP                  "Image\\backimage\\space3.bmp"
+
+IDB_BITMAP4             BITMAP                  "Image\\backimage\\space4.bmp"
+
+IDB_BITMAP5             BITMAP                  "Image\\backimage\\space5.bmp"
+
+IDB_BITMAP6             BITMAP                  "Image\\enforce\\attack.bmp"
+
+IDB_BITMAP7             BITMAP                  "Image\\enforce\\attack_speed.bmp"
+
+IDB_BITMAP8             BITMAP                  "Image\\enforce\\fuel.bmp"
+
+IDB_BITMAP9             BITMAP                  "Image\\enforce\\speed.bmp"
+
+IDB_BITMAP10            BITMAP                  "Image\\enforce\\type1.bmp"
+
+IDB_BITMAP11            BITMAP                  "Image\\enforce\\type2.bmp"
+
+IDB_BITMAP12            BITMAP                  "Image\\enforce\\type3.bmp"
+
+IDB_BITMAP13            BITMAP                  "Image\\Button\\Done_Button.bmp"
+
+IDB_BITMAP14            BITMAP                  "Image\\Button\\Enforce.bmp"
+
+IDB_BITMAP15            BITMAP                  "Image\\Button\\Fight.bmp"
+
+IDB_BITMAP16            BITMAP                  "Image\\Button\\Plinko.bmp"
+
+IDB_BITMAP17            BITMAP                  "Image\\Button\\Return.bmp"
+
+IDB_BITMAP18            BITMAP                  "Image\\Button\\Setting_Button.bmp"
+
+IDB_BITMAP19            BITMAP                  "Image\\Button\\Start_Button.bmp"
+
+IDB_BITMAP20            BITMAP                  "Image\\object\\bullet.bmp"
+
+IDB_BITMAP21            BITMAP                  "Image\\object\\plinko.bmp"
+
+IDB_BITMAP22            BITMAP                  "Image\\object\\rocket.bmp"
+
+IDB_BITMAP23            BITMAP                  "Image\\object\\stone1.bmp"
+
+IDB_BITMAP24            BITMAP                  "Image\\object\\stone2.bmp"
+
+IDB_BITMAP25            BITMAP                  "Image\\object\\stone3.bmp"
+
+IDB_BITMAP26            BITMAP                  "Image\\object\\stone4.bmp"
+
+IDB_BITMAP27            BITMAP                  "Image\\enforce\\new_stone.bmp"
+
+IDB_BITMAP28            BITMAP                  "Image\\object\\boss.bmp"
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
