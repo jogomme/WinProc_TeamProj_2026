@@ -43,6 +43,11 @@ int GameMap::GetRare() const
 	return m_rare;
 }
 
+void GameMap::SetRare(int deg)
+{
+	m_rare = deg;
+}
+
 bool GameMap::isfull() const
 {
 	return m_rockNum >= m_goal;

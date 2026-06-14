@@ -995,6 +995,7 @@ void GameStart(HWND hWnd, RECT& rectView, int mx, int my, int& window_scene)
 
 		// 스테이지 초기화
 		gMap.SetStage(1);
+		gMap.SetRare(0);
 
 		// 화면 중앙 고정
 		SetCursorPos(width / 2, height / 2);
